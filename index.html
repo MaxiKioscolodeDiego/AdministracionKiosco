@@ -6,20 +6,25 @@
 <title>Maxi Kiosco lo de Diego</title>
 <style>
   :root {
-    --fondo: #f5f3ee;
+    --fondo: #f4f6fb;
     --tarjeta: #ffffff;
-    --texto: #1d2125;
-    --suave: #6b7280;
-    --borde: #e4e0d6;
-    --primario: #1f6f5c;
-    --primario-oscuro: #17574a;
-    --primario-claro: #e4f1ec;
-    --rojo: #b42318;
-    --rojo-claro: #fdecea;
-    --ambar: #a15c07;
-    --ambar-claro: #fef3e2;
+    --texto: #14213d;
+    --suave: #64708a;
+    --borde: #e1e6f0;
+    --primario: #1d4ed8;          /* azul: botones y acciones */
+    --primario-oscuro: #1e3a8a;
+    --primario-claro: #e3ebff;
+    --amarillo: #ffc93c;          /* amarillo: sección activa y destacados */
+    --amarillo-claro: #fff6d9;
+    --rojo: #d62828;              /* rojo: alertas, faltantes y avisos */
+    --rojo-claro: #fde8e8;
+    --ambar: #9a5b00;
+    --ambar-claro: #fff3d6;
     --verde: #1f7a3a;
+    --lateral: #102a5c;           /* azul profundo de la columna */
     --radio: 12px;
+    --ancho-lateral: 250px;
+    --ancho-lateral-cerrado: 70px;
   }
   * { box-sizing: border-box; }
   body {
@@ -30,42 +35,80 @@
     font-size: 15px;
     line-height: 1.4;
   }
-  .barra-superior { position: sticky; top: 0; z-index: 20; }
-  header {
-    background: var(--primario);
-    color: #fff;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+
+  /* ── Columna lateral desplegable ── */
+  .lateral {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 30;
+    width: var(--ancho-lateral); background: var(--lateral); color: #fff;
+    display: flex; flex-direction: column; transition: width .2s ease, transform .2s ease;
+    overflow: hidden;
   }
-  header h1 { font-size: 18px; margin: 0; flex: 1; min-width: 160px; }
+  .lateral .franja { height: 5px; flex-shrink: 0; background: linear-gradient(90deg, var(--amarillo) 0 33.3%, var(--rojo) 33.3% 66.6%, #3b82f6 66.6%); }
+  .marca { display: flex; align-items: center; gap: 12px; padding: 18px 16px 16px; white-space: nowrap; }
+  .marca .logo { width: 38px; height: 38px; border-radius: 10px; background: var(--amarillo); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .marca .nombre { font-weight: 800; font-size: 16px; line-height: 1.15; }
+  .marca .nombre small { display: block; font-weight: 600; font-size: 13px; color: var(--amarillo); }
+  #pestanias { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; overflow-y: auto; flex: 1; }
+  #pestanias button {
+    position: relative; display: flex; align-items: center; gap: 12px; width: 100%;
+    background: none; border: 0; border-radius: 10px; padding: 11px 12px;
+    font: inherit; font-size: 15px; color: rgba(255,255,255,.78); cursor: pointer; text-align: left; white-space: nowrap;
+  }
+  #pestanias button:hover { background: rgba(255,255,255,.08); color: #fff; }
+  #pestanias button.activa { background: var(--amarillo); color: var(--texto); font-weight: 700; }
+  #pestanias .icono { width: 24px; text-align: center; font-size: 18px; flex-shrink: 0; }
+  .contador { margin-left: auto; background: var(--rojo); color: #fff; border-radius: 999px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
+  .pie-lateral { padding: 12px 10px 16px; border-top: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 8px; }
+  .pie-lateral .boton-lateral {
+    display: flex; align-items: center; gap: 12px; background: none; border: 0; border-radius: 10px; padding: 10px 12px;
+    color: rgba(255,255,255,.78); font: inherit; cursor: pointer; white-space: nowrap; text-align: left;
+  }
+  .pie-lateral .boton-lateral:hover { background: rgba(255,255,255,.08); color: #fff; }
   .insignia {
-    font-size: 12px;
-    background: rgba(255,255,255,.16);
-    padding: 4px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
+    font-size: 12px; background: rgba(255,255,255,.12); color: #fff;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap; align-self: flex-start; margin-left: 12px;
   }
-  .insignia.local { background: #f4c26b; color: #3d2a00; }
-  header input[type=month] {
-    border: 0; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px; width: auto;
+  .insignia.local { background: var(--amarillo); color: var(--texto); }
+
+  /* Columna achicada (solo íconos) en compu */
+  body.lateral-cerrado .lateral { width: var(--ancho-lateral-cerrado); }
+  body.lateral-cerrado .lateral .texto-menu,
+  body.lateral-cerrado .marca .nombre,
+  body.lateral-cerrado .insignia { display: none; }
+  body.lateral-cerrado #pestanias button,
+  body.lateral-cerrado .pie-lateral .boton-lateral { justify-content: center; padding: 11px 0; }
+  body.lateral-cerrado .marca { justify-content: center; padding-left: 0; padding-right: 0; }
+  body.lateral-cerrado .contador { position: absolute; top: 4px; right: 6px; padding: 0 5px; }
+
+  /* ── Contenido ── */
+  .contenido { margin-left: var(--ancho-lateral); transition: margin-left .2s ease; min-height: 100vh; }
+  body.lateral-cerrado .contenido { margin-left: var(--ancho-lateral-cerrado); }
+  .barra-superior {
+    position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid var(--borde);
+    display: flex; align-items: center; gap: 12px; padding: 10px 20px;
+  }
+  .barra-superior h1 { font-size: 19px; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barra-superior input[type=month] {
+    border: 1px solid var(--borde); border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px; width: auto;
   }
   .boton-icono {
-    background: rgba(255,255,255,.16); color: #fff; border: 0; border-radius: 8px;
-    padding: 7px 10px; cursor: pointer; font: inherit; font-size: 14px;
+    background: var(--primario-claro); color: var(--primario); border: 0; border-radius: 8px;
+    padding: 8px 11px; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700;
   }
-  .boton-icono:hover { background: rgba(255,255,255,.26); }
-  nav {
-    display: flex; gap: 2px; overflow-x: auto; background: #fff;
-    border-bottom: 1px solid var(--borde); padding: 0 8px;
+  .boton-icono:hover { background: #d3e0ff; }
+  .velo { display: none; }
+
+  /* ── Celular: la columna se despliega por encima ── */
+  @media (max-width: 900px) {
+    .lateral, body.lateral-cerrado .lateral { width: var(--ancho-lateral); transform: translateX(-100%); }
+    body.lateral-cerrado .lateral .texto-menu, body.lateral-cerrado .marca .nombre, body.lateral-cerrado .insignia { display: initial; }
+    body.lateral-cerrado #pestanias button, body.lateral-cerrado .pie-lateral .boton-lateral { justify-content: flex-start; padding: 11px 12px; }
+    body.lateral-cerrado .contador { position: static; }
+    body.menu-abierto .lateral { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.35); }
+    body.menu-abierto .velo { display: block; position: fixed; inset: 0; background: rgba(10,20,45,.45); z-index: 25; }
+    .contenido, body.lateral-cerrado .contenido { margin-left: 0; }
+    .barra-superior { padding: 10px 12px; }
   }
-  nav button {
-    background: none; border: 0; padding: 12px 14px; font: inherit; color: var(--suave);
-    cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
-  }
-  nav button.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
   main { max-width: 1150px; margin: 0 auto; padding: 16px; }
   .vista { display: none; }
   .vista.activa { display: block; }
@@ -78,11 +121,12 @@
   .grilla-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
   .grilla-2 > .tarjeta { margin-bottom: 0; }
   .indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px; }
+  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-top: 3px solid var(--primario); border-radius: var(--radio); padding: 14px; }
   .indicador .etiqueta { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
   .indicador .valor { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .indicador .detalle { font-size: 12px; color: var(--suave); margin-top: 2px; }
-  .indicador.alerta { border-color: #f1b8b2; background: var(--rojo-claro); }
+  .indicador.alerta { border-color: #f4b4b4; background: var(--rojo-claro); }
+  .indicador.alerta { border-top-color: var(--rojo); }
   .indicador.alerta .valor { color: var(--rojo); }
 
   form .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px; }
@@ -102,14 +146,14 @@
   .boton:hover { background: var(--primario-oscuro); }
   .boton:disabled { opacity: .55; cursor: wait; }
   .boton.secundario { background: #fff; color: var(--texto); border: 1px solid var(--borde); }
-  .boton.secundario:hover { background: #f4f4f2; }
+  .boton.secundario:hover { background: #f3f5fa; }
   .boton.chico { padding: 5px 10px; font-size: 13px; font-weight: 500; }
-  .boton.peligro { background: #fff; color: var(--rojo); border: 1px solid #f1b8b2; }
+  .boton.peligro { background: #fff; color: var(--rojo); border: 1px solid #f4b4b4; }
   .enlace { background: none; border: 0; color: var(--primario); cursor: pointer; font: inherit; font-size: 13px; padding: 0; text-decoration: underline; }
 
   .calculo {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;
-    margin-top: 14px; padding: 12px; border-radius: 10px; background: #f7f6f2;
+    margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--amarillo-claro);
   }
   .calculo div span { display: block; font-size: 12px; color: var(--suave); }
   .calculo div strong { font-size: 18px; font-variant-numeric: tabular-nums; }
@@ -128,7 +172,7 @@
   .e-vencida { background: var(--rojo-claro); color: var(--rojo); }
   .e-proxima { background: var(--ambar-claro); color: var(--ambar); }
   .e-ok { background: var(--primario-claro); color: var(--primario); }
-  .e-neutra { background: #eeede9; color: var(--suave); }
+  .e-neutra { background: #eef1f6; color: var(--suave); }
   .fila-filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
   .fila-filtros label { min-width: 200px; }
   .nota { font-size: 13px; color: var(--suave); margin: 6px 0 0; }
@@ -145,9 +189,9 @@
   .etiqueta-cat { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: .03em; background: var(--primario-claro); color: var(--primario); }
   .etiqueta-cat.puchos { background: var(--ambar-claro); color: var(--ambar); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; background: #f1efe9; border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: #eef1f6; border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
   .chip button { border: 0; background: none; color: var(--rojo); cursor: pointer; font-size: 14px; padding: 0 4px; }
-  .indicador.puchos { border-color: #f3d29a; background: #fffaf0; }
+  .indicador.puchos { border-color: #f6dc8f; border-top-color: var(--amarillo); background: var(--amarillo-claro); }
   /* Gráficos */
   .grafico-contenedor { position: relative; }
   .grafico-contenedor svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -168,25 +212,36 @@
 </head>
 <body>
 
-<div class="barra-superior">
-  <header>
-    <h1>🏪 Maxi Kiosco lo de Diego · Administración</h1>
-    <span id="insigniaConexion" class="insignia">…</span>
-    <input type="month" id="filtroMes" title="Mes a mostrar">
-    <button class="boton-icono" id="botonRecargar" title="Volver a leer la planilla">⟳</button>
-    <button class="boton-icono" id="botonConfig" title="Configuración">⚙︎</button>
-  </header>
+<aside class="lateral" id="menuLateral">
+  <div class="franja"></div>
+  <div class="marca">
+    <div class="logo">🏪</div>
+    <div class="nombre">Maxi Kiosco<small>lo de Diego</small></div>
+  </div>
   <nav id="pestanias">
-    <button data-vista="resumen" class="activa">Resumen</button>
-    <button data-vista="ventas">Ventas</button>
-    <button data-vista="graficos">Gráficos</button>
-    <button data-vista="caja">Cierre de caja</button>
-    <button data-vista="stock">Stock</button>
-    <button data-vista="proveedores">Proveedores y deudas</button>
-    <button data-vista="gastos">Gastos</button>
-    <button data-vista="agenda">Agenda</button>
-    <button data-vista="accesos">Accesos</button>
+    <button data-vista="resumen" class="activa" title="Resumen"><span class="icono">📊</span><span class="texto-menu">Resumen</span></button>
+    <button data-vista="ventas" title="Ventas"><span class="icono">🧾</span><span class="texto-menu">Ventas</span></button>
+    <button data-vista="graficos" title="Gráficos"><span class="icono">📈</span><span class="texto-menu">Gráficos</span></button>
+    <button data-vista="caja" title="Cierre de caja"><span class="icono">💰</span><span class="texto-menu">Cierre de caja</span><span class="contador oculto" id="contadorSinRevisar"></span></button>
+    <button data-vista="stock" title="Stock"><span class="icono">📦</span><span class="texto-menu">Stock</span></button>
+    <button data-vista="proveedores" title="Proveedores y deudas"><span class="icono">🚚</span><span class="texto-menu">Proveedores y deudas</span></button>
+    <button data-vista="gastos" title="Gastos"><span class="icono">💸</span><span class="texto-menu">Gastos</span></button>
+    <button data-vista="agenda" title="Agenda"><span class="icono">📇</span><span class="texto-menu">Agenda</span></button>
+    <button data-vista="accesos" title="Accesos"><span class="icono">🔐</span><span class="texto-menu">Accesos</span></button>
   </nav>
+  <div class="pie-lateral">
+    <span id="insigniaConexion" class="insignia">…</span>
+    <button class="boton-lateral" id="botonConfig" title="Configuración"><span class="icono">⚙︎</span><span class="texto-menu">Configuración</span></button>
+  </div>
+</aside>
+<div class="velo" id="velo"></div>
+
+<div class="contenido">
+<div class="barra-superior">
+  <button class="boton-icono" id="botonMenu" title="Mostrar / ocultar menú" aria-label="Menú">☰</button>
+  <h1 id="tituloSeccion">Resumen</h1>
+  <input type="month" id="filtroMes" title="Mes a mostrar">
+  <button class="boton-icono" id="botonRecargar" title="Volver a leer la planilla">⟳</button>
 </div>
 
 <main>
@@ -328,7 +383,7 @@
 
   <!-- ═════════════ CAJA ═════════════ -->
   <section class="vista" id="vista-caja">
-    <div class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f4c26b;background:#fffaf0">
+    <div class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f6dc8f;border-left:5px solid var(--amarillo);background:var(--amarillo-claro)">
       <h2>Cierres enviados por empleados sin revisar</h2>
       <div class="tabla-contenedor" id="tablaSinRevisar"></div>
     </div>
@@ -535,6 +590,7 @@
     </div>
   </section>
 </main>
+</div>
 
 <datalist id="listaProveedores"></datalist>
 <datalist id="listaCategorias"></datalist>
@@ -856,6 +912,9 @@ function notasCierre(c) {
 function dibujarSinRevisar() {
   const lista = datos.cierres.filter(c => c.estado === 'Sin revisar').sort(ordenarPorFecha);
   document.getElementById('tarjetaSinRevisar').classList.toggle('oculto', !lista.length);
+  const contador = document.getElementById('contadorSinRevisar');   // globito rojo en el menú
+  contador.textContent = lista.length;
+  contador.classList.toggle('oculto', !lista.length);
   if (!lista.length) return;
   document.getElementById('tablaSinRevisar').innerHTML = `<table>
     <thead><tr><th>Fecha</th><th>Turno</th><th>Quién</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Puchos</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Detalle</th><th></th></tr></thead>
@@ -1171,7 +1230,7 @@ function dibujarResumen() {
 
   const nombreMes = new Date(mesSeleccionado + '-15').toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   document.getElementById('indicadoresResumen').innerHTML = `
-    ${sinRevisar ? `<div class="indicador" style="border-color:#f4c26b;background:#fffaf0;cursor:pointer" data-ir-caja><div class="etiqueta">Cierres sin revisar</div><div class="valor" style="color:var(--ambar)">${sinRevisar}</div><div class="detalle">Enviados desde la caja · tocá para ver</div></div>` : ''}
+    ${sinRevisar ? `<div class="indicador puchos" style="cursor:pointer" data-ir-caja><div class="etiqueta">Cierres sin revisar</div><div class="valor" style="color:var(--ambar)">${sinRevisar}</div><div class="detalle">Enviados desde la caja · tocá para ver</div></div>` : ''}
     <div class="indicador"><div class="etiqueta">💵 Efectivo</div><div class="valor">${pesos(t.efectivo)}</div><div class="detalle">Ventas del mes sin puchos</div></div>
     <div class="indicador"><div class="etiqueta">📱 Mercado Pago</div><div class="valor">${pesos(t.mercadoPago)}</div><div class="detalle">Ventas del mes sin puchos</div></div>
     <div class="indicador puchos"><div class="etiqueta">🚬 Puchos</div><div class="valor">${pesos(t.puchosEfectivo + t.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(t.puchosEfectivo)} · MP ${pesos(t.puchosMercadoPago)}</div></div>
@@ -1204,7 +1263,7 @@ function dibujarResumen() {
     ? categorias.map(([cat, monto]) => `
       <div style="display:grid;grid-template-columns:minmax(120px,200px) 1fr auto;gap:10px;align-items:center;margin-bottom:8px">
         <span style="font-size:14px">${escapar(cat)}</span>
-        <div style="background:#efede7;border-radius:4px;height:10px"><div style="width:${(monto / maximo * 100).toFixed(1)}%;background:var(--primario);height:10px;border-radius:4px"></div></div>
+        <div style="background:#eef1f6;border-radius:4px;height:10px"><div style="width:${(monto / maximo * 100).toFixed(1)}%;background:var(--primario);height:10px;border-radius:4px"></div></div>
         <span class="num" style="font-size:14px;font-variant-numeric:tabular-nums">${pesos(monto)}</span>
       </div>`).join('')
     : '<p class="vacio">Sin gastos en este mes.</p>';
@@ -1524,7 +1583,7 @@ function dibujarGrafico() {
   for (let i = 0; i <= pasos; i++) {
     const valor = maximo / pasos * i;
     const yy = y(valor);
-    svg += `<line x1="${margen.izquierda}" x2="${ancho - margen.derecha}" y1="${yy}" y2="${yy}" stroke="${i === 0 ? '#c9c5ba' : '#ece9e2'}" stroke-width="1"/>`;
+    svg += `<line x1="${margen.izquierda}" x2="${ancho - margen.derecha}" y1="${yy}" y2="${yy}" stroke="${i === 0 ? '#c3cad8' : '#e9edf4'}" stroke-width="1"/>`;
     svg += `<text x="${margen.izquierda - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="#6b7280">${formatoEje(valor, metrica)}</text>`;
   }
   filas.forEach((f, i) => {
@@ -1583,7 +1642,22 @@ function cambiarVista(nombre) {
   document.querySelectorAll('.vista').forEach(v => v.classList.toggle('activa', v.id === 'vista-' + nombre));
   document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
   try { localStorage.setItem('kiosco_vista', nombre); } catch (e) {}
+  const boton = document.querySelector(`#pestanias [data-vista="${nombre}"]`);
+  if (boton) document.getElementById('tituloSeccion').textContent = boton.querySelector('.texto-menu').textContent;
+  document.body.classList.remove('menu-abierto');   // en el celular, elegir una sección cierra el menú
+  window.scrollTo(0, 0);
   if (nombre === 'graficos' && configuracion.url) cargarGraficos();
+}
+
+// ☰: en compu achica/agranda la columna (y lo recuerda); en el celular la despliega
+function alternarMenu() {
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    document.body.classList.toggle('menu-abierto');
+  } else {
+    const cerrado = document.body.classList.toggle('lateral-cerrado');
+    try { localStorage.setItem('kiosco_lateral_cerrado', cerrado ? '1' : ''); } catch (e) {}
+    if (datosGrafico) setTimeout(dibujarGrafico, 220);   // el gráfico se adapta al nuevo ancho
+  }
 }
 
 function actualizarInsignia() {
@@ -1631,8 +1705,13 @@ function iniciar() {
   document.getElementById('filtroCategoria').addEventListener('change', dibujarStock);
 
   document.getElementById('pestanias').addEventListener('click', e => {
-    if (e.target.dataset.vista) cambiarVista(e.target.dataset.vista);
+    const boton = e.target.closest('[data-vista]');
+    if (boton) cambiarVista(boton.dataset.vista);
   });
+  try { if (localStorage.getItem('kiosco_lateral_cerrado')) document.body.classList.add('lateral-cerrado'); } catch (e) {}
+  document.getElementById('botonMenu').addEventListener('click', alternarMenu);
+  document.getElementById('velo').addEventListener('click', () => document.body.classList.remove('menu-abierto'));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.body.classList.remove('menu-abierto'); });
   try { const vista = localStorage.getItem('kiosco_vista'); if (vista) cambiarVista(vista); } catch (e) {}
 
   // Formularios

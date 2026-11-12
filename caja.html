@@ -6,22 +6,72 @@
 <title>Caja · Maxi Kiosco lo de Diego</title>
 <style>
   :root {
-    --fondo: #f5f3ee; --tarjeta: #fff; --texto: #1d2125; --suave: #6b7280; --borde: #e4e0d6;
-    --primario: #1f6f5c; --primario-oscuro: #17574a; --primario-claro: #e4f1ec;
-    --rojo: #b42318; --rojo-claro: #fdecea; --ambar: #a15c07; --ambar-claro: #fef3e2;
-    --verde: #1f7a3a; --azul: #0b5cad; --azul-claro: #e6f0fb; --radio: 14px;
+    --fondo: #f4f6fb; --tarjeta: #fff; --texto: #14213d; --suave: #64708a; --borde: #e1e6f0;
+    --primario: #1d4ed8; --primario-oscuro: #1e3a8a; --primario-claro: #e3ebff;   /* azul */
+    --amarillo: #ffc93c; --amarillo-claro: #fff6d9;                                 /* amarillo */
+    --rojo: #d62828; --rojo-claro: #fde8e8;                                         /* rojo */
+    --ambar: #9a5b00; --ambar-claro: #fff3d6; --lateral: #102a5c;
+    --verde: #1f7a3a; --azul: #6d28d9; --azul-claro: #efe7ff; --radio: 14px;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); font-size: 16px; line-height: 1.4; }
-  header { background: var(--primario); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
-  header h1 { font-size: 18px; margin: 0; flex: 1; min-width: 180px; }
-  header .usuario { font-size: 14px; opacity: .9; }
-  .boton-cabecera { background: rgba(255,255,255,.18); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .boton-cabecera:hover { background: rgba(255,255,255,.3); }
-  .boton-cabecera.retiro { background: #fff; color: var(--rojo); }
-  nav { display: flex; gap: 2px; background: #fff; border-bottom: 1px solid var(--borde); padding: 0 8px; }
-  nav button { background: none; border: 0; padding: 13px 16px; font: inherit; color: var(--suave); cursor: pointer; border-bottom: 3px solid transparent; }
-  nav button.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
+  /* ── Columna lateral desplegable ── */
+  .lateral {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 30; width: 240px;
+    background: var(--lateral); color: #fff; display: flex; flex-direction: column;
+    transition: width .2s ease, transform .2s ease; overflow: hidden;
+  }
+  .franja { height: 5px; flex-shrink: 0; background: linear-gradient(90deg, var(--amarillo) 0 33.3%, var(--rojo) 33.3% 66.6%, #3b82f6 66.6%); }
+  .marca { display: flex; align-items: center; gap: 12px; padding: 18px 16px 16px; white-space: nowrap; }
+  .marca .logo { width: 38px; height: 38px; border-radius: 10px; background: var(--amarillo); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .marca .nombre { font-weight: 800; font-size: 16px; line-height: 1.15; }
+  .marca .nombre small { display: block; font-weight: 600; font-size: 13px; color: var(--amarillo); }
+  #pestanias { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; flex: 1; }
+  #pestanias button {
+    display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: 0; border-radius: 10px;
+    padding: 12px; font: inherit; font-size: 16px; color: rgba(255,255,255,.78); cursor: pointer; text-align: left; white-space: nowrap;
+  }
+  #pestanias button:hover { background: rgba(255,255,255,.08); color: #fff; }
+  #pestanias button.activa { background: var(--amarillo); color: var(--texto); font-weight: 700; }
+  .icono { width: 24px; text-align: center; font-size: 18px; flex-shrink: 0; }
+  .pie-lateral { padding: 14px 16px 18px; border-top: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+  .pie-lateral .avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; flex-shrink: 0; }
+  .pie-lateral .usuario { font-size: 14px; line-height: 1.2; }
+  .pie-lateral .usuario small { display: block; color: var(--amarillo); font-size: 12px; }
+
+  body.lateral-cerrado .lateral { width: 70px; }
+  body.lateral-cerrado .texto-menu, body.lateral-cerrado .marca .nombre, body.lateral-cerrado .pie-lateral .usuario { display: none; }
+  body.lateral-cerrado #pestanias button { justify-content: center; padding: 12px 0; }
+  body.lateral-cerrado .marca, body.lateral-cerrado .pie-lateral { justify-content: center; padding-left: 0; padding-right: 0; }
+
+  /* ── Contenido y barra superior ── */
+  .contenido { margin-left: 240px; transition: margin-left .2s ease; min-height: 100vh; }
+  body.lateral-cerrado .contenido { margin-left: 70px; }
+  body.sin-menu .lateral, body.sin-menu #botonMenu { display: none; }
+  body.sin-menu .contenido { margin-left: 0; }
+  .barra-superior {
+    position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid var(--borde);
+    display: flex; align-items: center; gap: 12px; padding: 10px 20px;
+  }
+  body.sin-menu .barra-superior { background: var(--lateral); color: #fff; border-bottom: 0; border-top: 5px solid; border-image: linear-gradient(90deg, var(--amarillo) 0 33.3%, var(--rojo) 33.3% 66.6%, #3b82f6 66.6%) 1; }
+  .barra-superior h1 { font-size: 19px; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boton-icono { background: var(--primario-claro); color: var(--primario); border: 0; border-radius: 8px; padding: 8px 11px; cursor: pointer; font: inherit; font-size: 15px; font-weight: 700; }
+  .boton-retiro { background: var(--rojo); color: #fff; border: 0; border-radius: 10px; padding: 10px 16px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .boton-retiro:hover { background: #b51f1f; }
+  .boton-retiro:disabled { opacity: .6; cursor: wait; }
+  .velo { display: none; }
+
+  /* ── Celular: la columna se despliega por encima ── */
+  @media (max-width: 900px) {
+    .lateral, body.lateral-cerrado .lateral { width: 240px; transform: translateX(-100%); }
+    body.lateral-cerrado .texto-menu, body.lateral-cerrado .marca .nombre, body.lateral-cerrado .pie-lateral .usuario { display: initial; }
+    body.lateral-cerrado #pestanias button { justify-content: flex-start; padding: 12px; }
+    body.lateral-cerrado .marca, body.lateral-cerrado .pie-lateral { justify-content: flex-start; padding-left: 16px; padding-right: 16px; }
+    body.menu-abierto .lateral { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.35); }
+    body.menu-abierto .velo { display: block; position: fixed; inset: 0; background: rgba(10,20,45,.45); z-index: 25; }
+    .contenido, body.lateral-cerrado .contenido { margin-left: 0; }
+    .barra-superior { padding: 10px 12px; }
+  }
   main { max-width: 980px; margin: 0 auto; padding: 16px; }
   .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px; margin-bottom: 16px; }
   .centrado { max-width: 420px; margin: 40px auto; text-align: center; }
@@ -59,7 +109,7 @@
   .monto-venta { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; padding: 14px 0 4px; }
   .medios { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
   .medio { border: 2px solid var(--borde); background: #fff; border-radius: 12px; padding: 14px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; color: var(--texto); }
-  .medio.elegido { border-color: var(--primario); background: var(--primario-claro); color: var(--primario); }
+  .medio.elegido { border-color: var(--amarillo); background: var(--amarillo-claro); color: var(--texto); }
 
   .venta-registrada { display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: start; }
   .venta-registrada .hora { font-size: 14px; color: var(--suave); font-variant-numeric: tabular-nums; }
@@ -69,11 +119,11 @@
   .vacio { color: var(--suave); padding: 12px 0; }
 
   .indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; }
+  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-top: 3px solid var(--primario); border-radius: 12px; padding: 14px; }
   .indicador .titulo { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
   .indicador .valor { font-size: 21px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
   .indicador .detalle { font-size: 12px; color: var(--suave); margin-top: 2px; }
-  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 14px; padding: 12px; border-radius: 10px; background: #f7f6f2; }
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 14px; padding: 12px; border-radius: 10px; background: var(--amarillo-claro); }
   .calculo span { display: block; font-size: 12px; color: var(--suave); }
   .calculo strong { font-size: 19px; font-variant-numeric: tabular-nums; }
   .positivo { color: var(--verde); } .negativo { color: var(--rojo); }
@@ -83,17 +133,30 @@
   .aviso.error-aviso { background: var(--rojo); }
 </style>
 </head>
-<body>
+<body class="sin-menu">
+<aside class="lateral" id="menuLateral">
+  <div class="franja"></div>
+  <div class="marca">
+    <div class="logo">🏪</div>
+    <div class="nombre">Maxi Kiosco<small>lo de Diego</small></div>
+  </div>
+  <nav id="pestanias">
+    <button data-vista="ventas" class="activa" title="Registrar ventas"><span class="icono">🧾</span><span class="texto-menu">Registrar ventas</span></button>
+    <button data-vista="cierre" id="menuCierre" title="Cierre de caja"><span class="icono">💰</span><span class="texto-menu">Cierre de caja</span></button>
+  </nav>
+  <div class="pie-lateral">
+    <div class="avatar">👤</div>
+    <div class="usuario" id="textoUsuario"></div>
+  </div>
+</aside>
+<div class="velo" id="velo"></div>
 
-<header>
-  <h1>🏪 Maxi Kiosco lo de Diego</h1>
-  <span class="usuario oculto" id="textoUsuario"></span>
-  <button class="boton-cabecera retiro oculto" id="botonRetiro">Me retiro</button>
+<div class="contenido">
+<header class="barra-superior">
+  <button class="boton-icono" id="botonMenu" title="Mostrar / ocultar menú" aria-label="Menú">☰</button>
+  <h1 id="tituloSeccion">🏪 Maxi Kiosco lo de Diego</h1>
+  <button class="boton-retiro oculto" id="botonRetiro">🚪 Me retiro</button>
 </header>
-<nav id="pestanias" class="oculto">
-  <button data-vista="ventas" class="activa">Registrar ventas</button>
-  <button data-vista="cierre">Cierre de caja</button>
-</nav>
 
 <main>
   <!-- ═════════ EQUIPO NO AUTORIZADO ═════════ -->
@@ -188,6 +251,7 @@
     </div>
   </section>
 </main>
+</div>
 
 <datalist id="listaProductos"></datalist>
 <div id="avisos"></div>
@@ -275,10 +339,14 @@ function mostrarPantalla(cual) {
   mostrar('pantallaEquipo', cual === 'equipo');
   mostrar('pantallaIngreso', cual === 'ingreso');
   const enApp = cual === 'app';
-  mostrar('textoUsuario', enApp);
+  document.body.classList.toggle('sin-menu', !enApp);      // sin sesión no hay columna
+  document.body.classList.remove('menu-abierto');
   mostrar('botonRetiro', enApp);
-  mostrar('pestanias', enApp && sesion?.rol === 'gerente');
-  if (!enApp) { mostrar('vista-ventas', false); mostrar('vista-cierre', false); }
+  mostrar('menuCierre', enApp && sesion?.rol === 'gerente');   // el cierre es solo del gerente
+  if (!enApp) {
+    mostrar('vista-ventas', false); mostrar('vista-cierre', false);
+    document.getElementById('tituloSeccion').textContent = '🏪 Maxi Kiosco lo de Diego';
+  }
   if (cual === 'ingreso') setTimeout(() => document.querySelector('#formIngreso [name=clave]').focus(), 50);
 }
 
@@ -330,7 +398,7 @@ async function ingresar(evento) {
 }
 
 function abrirApp() {
-  document.getElementById('textoUsuario').textContent = `${sesion.nombre} · ${sesion.rol === 'gerente' ? 'Gerente' : 'Empleado'}`;
+  document.getElementById('textoUsuario').innerHTML = `${escapar(sesion.nombre)}<small>${sesion.rol === 'gerente' ? 'Gerente' : 'Empleado'}</small>`;
   mostrarPantalla('app');
   cambiarVista('ventas');
   dibujarVentaActual();
@@ -349,7 +417,19 @@ function cambiarVista(nombre) {
   mostrar('vista-ventas', nombre === 'ventas');
   mostrar('vista-cierre', nombre === 'cierre');
   document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
+  document.getElementById('tituloSeccion').textContent = nombre === 'cierre' ? 'Cierre de caja' : 'Registrar ventas';
+  document.body.classList.remove('menu-abierto');   // en el celular, elegir una sección cierra el menú
   if (nombre === 'cierre') cargarResumenCaja();
+}
+
+// ☰: en compu achica/agranda la columna (y lo recuerda); en el celular la despliega
+function alternarMenu() {
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    document.body.classList.toggle('menu-abierto');
+  } else {
+    const cerrado = document.body.classList.toggle('lateral-cerrado');
+    guardarLocal('kiosco_caja_lateral_cerrado', cerrado ? 1 : null);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -592,7 +672,14 @@ document.querySelectorAll('.medio').forEach(b => b.addEventListener('click', () 
   guardarVentaActual();
   dibujarVentaActual();
 }));
-document.getElementById('pestanias').addEventListener('click', e => { if (e.target.dataset.vista) cambiarVista(e.target.dataset.vista); });
+document.getElementById('pestanias').addEventListener('click', e => {
+  const boton = e.target.closest('[data-vista]');
+  if (boton) cambiarVista(boton.dataset.vista);
+});
+document.getElementById('botonMenu').addEventListener('click', alternarMenu);
+document.getElementById('velo').addEventListener('click', () => document.body.classList.remove('menu-abierto'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.body.classList.remove('menu-abierto'); });
+if (leerLocal('kiosco_caja_lateral_cerrado')) document.body.classList.add('lateral-cerrado');
 document.getElementById('botonRetiro').addEventListener('click', meRetiro);
 document.getElementById('formCierre').addEventListener('input', calcularCierre);
 document.getElementById('formCierre').addEventListener('submit', enviarCierre);
