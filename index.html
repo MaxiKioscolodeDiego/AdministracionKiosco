@@ -98,10 +98,36 @@
   .boton-icono:hover { background: #d3e0ff; }
   .velo { display: none; }
 
+  /* ── Según quién entró ── */
+  .no-rol { display: none !important; }
+  body.sin-menu .lateral, body.sin-menu #botonMenu, body.sin-menu .solo-sesion { display: none !important; }
+  body.sin-menu .contenido { margin-left: 0 !important; }
+  body.sin-menu .barra-superior { background: var(--lateral); color: #fff; border-bottom: 0; border-top: 5px solid;
+    border-image: linear-gradient(90deg, var(--amarillo) 0 33.3%, var(--rojo) 33.3% 66.6%, #3b82f6 66.6%) 1; }
+  .pie-lateral .persona { display: flex; align-items: center; gap: 12px; padding: 4px 6px; white-space: nowrap; }
+  .pie-lateral .avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.14); display: grid; place-items: center; flex-shrink: 0; }
+  .pie-lateral .usuario { font-size: 14px; line-height: 1.2; }
+  .pie-lateral .usuario small { display: block; color: var(--amarillo); font-size: 12px; }
+  body.lateral-cerrado .pie-lateral .usuario { display: none; }
+  body.lateral-cerrado .pie-lateral .persona { justify-content: center; }
+  .boton-retiro { background: var(--rojo); color: #fff; border: 0; border-radius: 10px; padding: 9px 16px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .boton-retiro:hover { background: #b51f1f; }
+  .boton-retiro:disabled { opacity: .6; cursor: wait; }
+  .centrado { max-width: 420px; margin: 40px auto; text-align: center; }
+  .centrado label { text-align: left; }
+  .error-caja { background: var(--rojo-claro); color: var(--rojo); border-radius: 10px; padding: 12px; margin: 12px 0; font-size: 14px; text-align: left; }
+  .clave-grande { text-align: center; font-size: 22px !important; padding: 12px !important; }
+  .venta-registrada { display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: start; }
+  .venta-registrada .hora { font-size: 14px; color: var(--suave); font-variant-numeric: tabular-nums; }
+  .venta-registrada .productos { font-size: 14px; }
+  .venta-registrada .medio-chico { font-size: 12px; color: var(--suave); }
+  .venta-registrada .monto { font-weight: 700; font-variant-numeric: tabular-nums; }
+
   /* ── Celular: la columna se despliega por encima ── */
   @media (max-width: 900px) {
     .lateral, body.lateral-cerrado .lateral { width: var(--ancho-lateral); transform: translateX(-100%); }
-    body.lateral-cerrado .lateral .texto-menu, body.lateral-cerrado .marca .nombre, body.lateral-cerrado .insignia { display: initial; }
+    body.lateral-cerrado .lateral .texto-menu, body.lateral-cerrado .marca .nombre, body.lateral-cerrado .pie-lateral .usuario { display: initial; }
+    body.lateral-cerrado .pie-lateral .persona { justify-content: flex-start; }
     body.lateral-cerrado #pestanias button, body.lateral-cerrado .pie-lateral .boton-lateral { justify-content: flex-start; padding: 11px 12px; }
     body.lateral-cerrado .contador { position: static; }
     body.menu-abierto .lateral { transform: none; box-shadow: 0 0 40px rgba(0,0,0,.35); }
@@ -192,6 +218,26 @@
   .chip { display: inline-flex; align-items: center; gap: 6px; background: #eef1f6; border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
   .chip button { border: 0; background: none; color: var(--rojo); cursor: pointer; font-size: 14px; padding: 0 4px; }
   .indicador.puchos { border-color: #f6dc8f; border-top-color: var(--amarillo); background: var(--amarillo-claro); }
+  /* Registrar venta */
+  .fila-producto { display: grid; grid-template-columns: 1fr 90px 140px auto; gap: 10px; align-items: end; }
+  @media (max-width: 640px) { .fila-producto { grid-template-columns: 1fr 1fr; } .fila-producto .producto { grid-column: 1 / -1; } }
+  .fila-producto input { font-size: 16px; padding: 10px 12px; }
+  .fila-producto .boton { padding: 11px 16px; }
+  .info-producto { margin-top: 8px; font-size: 14px; color: var(--suave); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-height: 26px; }
+  .info-producto select { width: auto; font-size: 14px; padding: 4px 8px; }
+  .etiqueta-cat.nuevo { background: #efe7ff; color: #6d28d9; }
+  .items-venta { margin-top: 14px; border-top: 1px solid var(--borde); }
+  .item-venta { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--borde); }
+  .item-venta .detalle { font-size: 13px; color: var(--suave); }
+  .item-venta .monto { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .quitar { background: none; border: 0; color: var(--rojo); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .monto-venta { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; padding: 14px 0 4px; }
+  .medios { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .medio { border: 2px solid var(--borde); background: #fff; border-radius: 12px; padding: 14px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; color: var(--texto); }
+  .medio.elegido { border-color: var(--amarillo); background: var(--amarillo-claro); }
+  .boton.grande { width: 100%; padding: 13px; font-size: 17px; }
+  .error-venta { background: var(--rojo-claro); color: var(--rojo); border-radius: 10px; padding: 12px; margin: 0 0 12px; font-size: 14px; }
+
   /* Gráficos */
   .grafico-contenedor { position: relative; }
   .grafico-contenedor svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -210,7 +256,7 @@
   }
 </style>
 </head>
-<body>
+<body class="sin-menu">
 
 <aside class="lateral" id="menuLateral">
   <div class="franja"></div>
@@ -219,19 +265,19 @@
     <div class="nombre">Maxi Kiosco<small>lo de Diego</small></div>
   </div>
   <nav id="pestanias">
-    <button data-vista="resumen" class="activa" title="Resumen"><span class="icono">📊</span><span class="texto-menu">Resumen</span></button>
-    <button data-vista="ventas" title="Ventas"><span class="icono">🧾</span><span class="texto-menu">Ventas</span></button>
-    <button data-vista="graficos" title="Gráficos"><span class="icono">📈</span><span class="texto-menu">Gráficos</span></button>
-    <button data-vista="caja" title="Cierre de caja"><span class="icono">💰</span><span class="texto-menu">Cierre de caja</span><span class="contador oculto" id="contadorSinRevisar"></span></button>
-    <button data-vista="stock" title="Stock"><span class="icono">📦</span><span class="texto-menu">Stock</span></button>
-    <button data-vista="proveedores" title="Proveedores y deudas"><span class="icono">🚚</span><span class="texto-menu">Proveedores y deudas</span></button>
-    <button data-vista="gastos" title="Gastos"><span class="icono">💸</span><span class="texto-menu">Gastos</span></button>
-    <button data-vista="agenda" title="Agenda"><span class="icono">📇</span><span class="texto-menu">Agenda</span></button>
-    <button data-vista="accesos" title="Accesos"><span class="icono">🔐</span><span class="texto-menu">Accesos</span></button>
+    <button data-roles="admin" data-vista="resumen" class="activa" title="Resumen"><span class="icono">📊</span><span class="texto-menu">Resumen</span></button>
+    <button data-roles="admin gerente empleado" data-vista="vender" title="Registrar venta"><span class="icono">🛒</span><span class="texto-menu">Registrar venta</span></button>
+    <button data-roles="admin" data-vista="ventas" title="Ventas"><span class="icono">🧾</span><span class="texto-menu">Ventas</span></button>
+    <button data-roles="admin" data-vista="graficos" title="Gráficos"><span class="icono">📈</span><span class="texto-menu">Gráficos</span></button>
+    <button data-roles="admin gerente" data-vista="caja" title="Cierre de caja"><span class="icono">💰</span><span class="texto-menu">Cierre de caja</span><span class="contador oculto" id="contadorSinRevisar"></span></button>
+    <button data-roles="admin" data-vista="stock" title="Stock"><span class="icono">📦</span><span class="texto-menu">Stock</span></button>
+    <button data-roles="admin" data-vista="proveedores" title="Proveedores y deudas"><span class="icono">🚚</span><span class="texto-menu">Proveedores y deudas</span></button>
+    <button data-roles="admin" data-vista="gastos" title="Gastos"><span class="icono">💸</span><span class="texto-menu">Gastos</span></button>
+    <button data-roles="admin" data-vista="agenda" title="Agenda"><span class="icono">📇</span><span class="texto-menu">Agenda</span></button>
+    <button data-roles="admin" data-vista="accesos" title="Accesos"><span class="icono">🔐</span><span class="texto-menu">Accesos</span></button>
   </nav>
   <div class="pie-lateral">
-    <span id="insigniaConexion" class="insignia">…</span>
-    <button class="boton-lateral" id="botonConfig" title="Configuración"><span class="icono">⚙︎</span><span class="texto-menu">Configuración</span></button>
+    <div class="persona"><div class="avatar">👤</div><div class="usuario" id="textoUsuario"></div></div>
   </div>
 </aside>
 <div class="velo" id="velo"></div>
@@ -239,16 +285,43 @@
 <div class="contenido">
 <div class="barra-superior">
   <button class="boton-icono" id="botonMenu" title="Mostrar / ocultar menú" aria-label="Menú">☰</button>
-  <h1 id="tituloSeccion">Resumen</h1>
-  <input type="month" id="filtroMes" title="Mes a mostrar">
-  <button class="boton-icono" id="botonRecargar" title="Volver a leer la planilla">⟳</button>
+  <h1 id="tituloSeccion">🏪 Maxi Kiosco lo de Diego</h1>
+  <input type="month" id="filtroMes" title="Mes a mostrar" data-roles="admin" class="solo-sesion">
+  <button class="boton-icono solo-sesion" id="botonRecargar" title="Volver a leer la planilla" data-roles="admin">⟳</button>
+  <button class="boton-retiro solo-sesion" id="botonRetiro">🚪 Me retiro</button>
 </div>
 
 <main>
-  <div id="cargando" class="cargando">Cargando datos…</div>
+  <div id="cargando" class="cargando oculto">Cargando datos…</div>
+
+  <!-- ═════════════ EQUIPO NO AUTORIZADO ═════════════ -->
+  <section id="pantallaEquipo" class="tarjeta centrado oculto">
+    <h2>🔒 Este equipo no está autorizado</h2>
+    <p class="nota">El gerente y el empleado solo pueden usar la caja en equipos autorizados. Se hace una sola vez por equipo, con la clave de administración.</p>
+    <form id="formEquipo" autocomplete="off">
+      <div class="campos" style="grid-template-columns:1fr">
+        <label>Nombre para este equipo <input name="nombre" value="Compu del kiosco" required></label>
+        <label>Clave de administración <input name="claveAdmin" type="password" required></label>
+      </div>
+      <div id="errorEquipo" class="error-caja oculto"></div>
+      <div class="acciones"><button class="boton grande" type="submit">Autorizar este equipo</button></div>
+      <p class="nota"><button type="button" class="enlace" id="botonVolverIngreso">Volver a ingresar una clave</button></p>
+    </form>
+  </section>
+
+  <!-- ═════════════ INGRESO CON CLAVE ═════════════ -->
+  <section id="pantallaIngreso" class="tarjeta centrado oculto">
+    <h2>Ingresá tu clave</h2>
+    <p class="nota" id="textoIngreso">Hay que ingresarla todos los días a partir de las 8.</p>
+    <form id="formIngreso" autocomplete="off">
+      <input name="clave" type="password" placeholder="Clave" required autofocus class="clave-grande" autocomplete="current-password">
+      <div id="errorIngreso" class="error-caja oculto"></div>
+      <div class="acciones"><button class="boton grande" type="submit">Entrar</button></div>
+    </form>
+  </section>
 
   <!-- ═════════════ RESUMEN ═════════════ -->
-  <section class="vista activa" id="vista-resumen">
+  <section class="vista" id="vista-resumen">
     <div class="indicadores" id="indicadoresResumen"></div>
     <div class="grilla-2">
       <div class="tarjeta">
@@ -263,6 +336,44 @@
     <div class="tarjeta" style="margin-top:16px">
       <h3>Gastos del mes por categoría</h3>
       <div id="resumenGastos"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ REGISTRAR VENTA (administración) ═════════════ -->
+  <section class="vista" id="vista-vender">
+    <div class="tarjeta">
+      <h2>Nueva venta</h2>
+      <p class="nota" style="margin:-6px 0 12px">Queda registrada a nombre de <b id="nombreVendedor"></b> y entra en el próximo cierre de caja.</p>
+      <form id="formItemVenta" autocomplete="off">
+        <div class="fila-producto">
+          <label class="producto">Producto <input name="producto" list="listaProductosVenta" placeholder="Escribí o elegí un producto" required></label>
+          <label>Cantidad <input name="cantidad" type="number" min="0.01" step="any" value="1" inputmode="decimal" required></label>
+          <label>Precio c/u <input name="precio" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
+          <button class="boton" type="submit">+ Agregar</button>
+        </div>
+        <div class="info-producto" id="infoProductoVenta"></div>
+      </form>
+
+      <div class="items-venta" id="itemsVentaAdmin"></div>
+      <div class="monto-venta oculto" id="montoVentaAdmin"><span>Monto de esta venta</span><span id="textoMontoVentaAdmin"></span></div>
+
+      <div class="medios">
+        <button type="button" class="medio" data-medio-admin="Efectivo">💵 Efectivo</button>
+        <button type="button" class="medio" data-medio-admin="Mercado Pago">📱 Mercado Pago</button>
+      </div>
+      <div id="errorVentaAdmin" class="error-venta oculto"></div>
+      <button class="boton grande" id="botonRegistrarVentaAdmin" disabled>Registrar venta</button>
+    </div>
+
+    <div class="tarjeta" data-roles="gerente empleado">
+      <h3>Ventas registradas</h3>
+      <p class="nota" id="notaMisVentas" style="margin-top:-6px"></p>
+      <div id="listaMisVentas"><p class="vacio">Cargando…</p></div>
+    </div>
+    <div class="tarjeta" data-roles="admin">
+      <h3>Lo que se vendió hoy</h3>
+      <div class="indicadores" id="indicadoresHoy"></div>
+      <div class="tabla-contenedor" id="tablaVentasHoy"></div>
     </div>
   </section>
 
@@ -281,7 +392,7 @@
       <div class="tabla-contenedor" id="tablaVentas"></div>
     </div>
     <div class="tarjeta">
-      <h3>"Me retiro" del mes (gerente y empleado)</h3>
+      <h3>"Me retiro" del mes</h3>
       <div class="tabla-contenedor" id="tablaRetiros"></div>
     </div>
   </section>
@@ -383,12 +494,42 @@
 
   <!-- ═════════════ CAJA ═════════════ -->
   <section class="vista" id="vista-caja">
-    <div class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f6dc8f;border-left:5px solid var(--amarillo);background:var(--amarillo-claro)">
-      <h2>Cierres enviados por empleados sin revisar</h2>
+    <div data-roles="admin" class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f6dc8f;border-left:5px solid var(--amarillo);background:var(--amarillo-claro)">
+      <h2>Cierres sin revisar</h2>
       <div class="tabla-contenedor" id="tablaSinRevisar"></div>
     </div>
-    <div class="tarjeta">
-      <h2 id="tituloCierre">Nuevo cierre de caja</h2>
+    <div class="tarjeta" data-roles="admin gerente">
+      <h2>Lo vendido desde el último cierre</h2>
+      <p class="nota" id="notaResumen" style="margin-top:-6px"></p>
+      <div class="indicadores" id="resumenCaja"></div>
+      <button class="boton secundario" id="botonActualizarResumen">⟳ Actualizar</button>
+    </div>
+    <div class="tarjeta" data-roles="admin gerente">
+      <h2>Cerrar la caja</h2>
+      <form id="formCierreAuto" autocomplete="off">
+        <div class="campos">
+          <label>Turno
+            <select name="turno"><option>Mañana</option><option>Tarde</option><option>Noche</option><option>Día completo</option></select>
+          </label>
+          <label>Fondo inicial (cambio) <input name="fondoInicial" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Pagos hechos con la caja <input name="pagosDesdeCaja" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>¿Qué se pagó? <input name="detallePagosCaja" placeholder="Ej: Coca $15.000, sodero $4.000"></label>
+          <label>Retiros (al dueño, depósitos) <input name="retiros" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Efectivo contado <input name="efectivoContado" type="number" min="0" step="0.01" inputmode="decimal" required></label>
+          <label>Cambio que queda para el próximo turno <input name="fondoSiguiente" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label class="ancho">Observaciones <textarea name="observaciones" rows="2"></textarea></label>
+        </div>
+        <div class="calculo">
+          <div><span>Efectivo que debería haber</span><strong id="calcEsperadoAuto">$ 0</strong></div>
+          <div><span>Diferencia</span><strong id="calcDiferenciaAuto">—</strong></div>
+        </div>
+        <p class="nota">Las ventas se toman solas de lo registrado. Efectivo esperado = fondo + efectivo + puchos en efectivo − pagos − retiros.</p>
+        <div id="errorCierreAuto" class="error-caja oculto"></div>
+        <div class="acciones"><button class="boton grande" type="submit">Enviar cierre de caja</button></div>
+      </form>
+    </div>
+    <div class="tarjeta oculto" id="tarjetaCorregirCierre" data-roles="admin">
+      <h2 id="tituloCierre">Corregir cierre</h2>
       <form id="formCierre" autocomplete="off">
         <input type="hidden" name="id">
         <div class="campos">
@@ -427,12 +568,12 @@
           <div><span>Diferencia</span><strong id="calcDiferencia">—</strong></div>
         </div>
         <div class="acciones">
-          <button class="boton" type="submit">Guardar cierre</button>
-          <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+          <button class="boton" type="submit">Guardar cambios</button>
+          <button class="boton secundario" type="button" data-cancelar>Cancelar</button>
         </div>
       </form>
     </div>
-    <div class="tarjeta">
+    <div class="tarjeta" data-roles="admin">
       <h3>Cierres del mes</h3>
       <div class="tabla-contenedor" id="tablaCierres"></div>
     </div>
@@ -594,22 +735,7 @@
 
 <datalist id="listaProveedores"></datalist>
 <datalist id="listaCategorias"></datalist>
-
-<!-- Configuración -->
-<dialog id="dialogoConfig">
-  <h2>Conexión con Google Sheets</h2>
-  <label>URL de la aplicación web (Apps Script)
-    <input type="url" id="configUrl" placeholder="https://script.google.com/macros/s/…/exec">
-  </label>
-  <label>Clave de administración
-    <input type="password" id="configClave" placeholder="CLAVE_ADMIN de Codigo.gs">
-  </label>
-  <p class="nota">Esto se guarda en este navegador. La administración funciona desde cualquier equipo con tu clave.</p>
-  <div class="acciones">
-    <button class="boton" id="botonGuardarConfig">Guardar y conectar</button>
-    <button class="boton secundario" id="botonCerrarConfig">Cerrar</button>
-  </div>
-</dialog>
+<datalist id="listaProductosVenta"></datalist>
 
 <div id="avisos"></div>
 
@@ -620,7 +746,6 @@
 const TIPOS = ['cierres', 'deudas', 'pagos', 'gastos', 'proveedores', 'productos', 'palabras', 'retiros', 'equipos'];
 let datos = datosVacios();
 let ventasMes = [];          // líneas de venta del mes elegido (se piden aparte porque son muchas)
-let configuracion = leerConfiguracion();
 let mesSeleccionado = fechaLocal().slice(0, 7);   // "aaaa-mm"
 
 function datosVacios() {
@@ -628,29 +753,30 @@ function datosVacios() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   CONFIGURACIÓN (se guarda en este navegador)
+   CONFIGURACIÓN — pegá acá la URL /exec de Apps Script
    ══════════════════════════════════════════════════════════════ */
-function leerConfiguracion() {
-  try { return JSON.parse(localStorage.getItem('kiosco_config')) || { url: '', clave: '' }; }
-  catch (e) { return { url: '', clave: '' }; }
-}
-function guardarConfiguracion(nueva) {
-  configuracion = nueva;
-  try { localStorage.setItem('kiosco_config', JSON.stringify(nueva)); } catch (e) {}
-}
+const URL_API = 'https://script.google.com/macros/s/AKfycbynpbMwTvIYxZ3XzDKlKNLwyjLFbGk4QnTxeLxgFJVSXBfmmfqxmC3zp2pgQk77JPttnw/exec';
+
+let sesion = leerLocal('kiosco_sesion');   // { sesion, rol: 'admin'|'gerente'|'empleado', nombre, vence }
+
+function leerLocal(clave) { try { return JSON.parse(localStorage.getItem(clave)); } catch (e) { return null; } }
+function guardarLocal(clave, valor) { try { valor === null ? localStorage.removeItem(clave) : localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) {} }
+function esAdmin() { return sesion && sesion.rol === 'admin'; }
 
 /* ══════════════════════════════════════════════════════════════
    COMUNICACIÓN CON GOOGLE SHEETS
    ══════════════════════════════════════════════════════════════ */
 async function llamarApi(accion, parametros = {}) {
-  if (!configuracion.url) throw new Error('Falta configurar la conexión (botón ⚙︎)');
+  if (!URL_API) throw new Error('Falta pegar la URL de Apps Script en URL_API (index.html)');
   // text/plain evita el "preflight" CORS, que Apps Script no responde
-  const respuesta = await fetch(configuracion.url, {
+  const respuesta = await fetch(URL_API, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ accion, clave: configuracion.clave, ...parametros })
+    body: JSON.stringify({ accion, equipo: leerLocal('kiosco_equipo'), sesion: sesion && sesion.sesion, ...parametros })
   });
   const json = await respuesta.json();
+  if (json.codigo === 'EQUIPO') { guardarLocal('kiosco_equipo', null); mostrarPantalla('equipo'); throw new Error(json.error); }
+  if (json.codigo === 'SESION') { cerrarSesionLocal('La sesión venció: ingresá tu clave de nuevo.'); throw new Error(json.error); }
   if (!json.ok) throw new Error(json.error || 'Error desconocido');
   return json.datos;
 }
@@ -667,7 +793,6 @@ async function cargarTodo() {
   } finally {
     document.getElementById('cargando').classList.add('oculto');
   }
-  actualizarInsignia();
   dibujarTodo();
   if (!document.getElementById('formCierre').elements.id.value) valoresPorDefectoCierre();
 }
@@ -747,7 +872,7 @@ function cargarEnFormulario(form, registro, titulo, textoTitulo) {
 
 // Cada formulario sabe qué tipo guarda, cómo completar valores por defecto y qué título lleva
 const FORMULARIOS = {
-  formCierre:    { tipo: 'cierres',     titulo: 'tituloCierre',    textoNuevo: 'Nuevo cierre de caja', textoBoton: 'Guardar cierre',    porDefecto: valoresPorDefectoCierre, preparar: prepararCierre },
+  formCierre:    { tipo: 'cierres',     titulo: 'tituloCierre',    textoNuevo: 'Corregir cierre',      textoBoton: 'Guardar cambios',    porDefecto: valoresPorDefectoCierre, preparar: prepararCierre },
   formDeuda:     { tipo: 'deudas',      titulo: 'tituloDeuda',     textoNuevo: 'Registrar deuda',      textoBoton: 'Guardar deuda',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
   formPago:      { tipo: 'pagos',       titulo: 'tituloPago',      textoNuevo: 'Registrar pago',       textoBoton: 'Guardar pago',      porDefecto: f => { f.elements.fecha.value = fechaLocal(); actualizarNotaSaldo(); } },
   formGasto:     { tipo: 'gastos',      titulo: 'tituloGasto',     textoNuevo: 'Registrar gasto',      textoBoton: 'Guardar gasto',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
@@ -761,7 +886,8 @@ function limpiarFormulario(idForm) {
   const def = FORMULARIOS[idForm];
   form.reset();
   form.elements.id.value = '';
-  form.querySelector('[data-cancelar]').classList.add('oculto');
+  form.querySelector('[data-cancelar]').classList.toggle('oculto', idForm !== 'formCierre');
+  if (idForm === 'formCierre') document.getElementById('tarjetaCorregirCierre').classList.add('oculto');
   form.querySelector('button[type=submit]').textContent = def.textoBoton;
   document.getElementById(def.titulo).textContent = def.textoNuevo;
   def.porDefecto(form);
@@ -819,9 +945,10 @@ function editarRegistro(tipo, id) {
   const idForm = Object.keys(FORMULARIOS).find(k => FORMULARIOS[k].tipo === tipo);
   const vistaDelTipo = { cierres: 'caja', deudas: 'proveedores', pagos: 'proveedores', gastos: 'gastos', proveedores: 'agenda', productos: 'stock', palabras: 'stock' }[tipo];
   cambiarVista(vistaDelTipo);
+  if (tipo === 'cierres') document.getElementById('tarjetaCorregirCierre').classList.remove('oculto');
   const textos = { cierres: 'Editando cierre', deudas: 'Editando deuda', pagos: 'Editando pago', gastos: 'Editando gasto', proveedores: 'Editando proveedor', productos: 'Editando producto', palabras: 'Editando palabra' };
   cargarEnFormulario(document.getElementById(idForm), registro, FORMULARIOS[idForm].titulo, textos[tipo]);
-  if (tipo === 'cierres') calcularCierre();
+  if (tipo === 'cierres') { document.getElementById('tarjetaCorregirCierre').classList.remove('oculto'); calcularCierre(); }
   if (tipo === 'pagos') actualizarNotaSaldo();
 }
 
@@ -1379,6 +1506,378 @@ function dibujarRetiros() {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   REGISTRAR VENTA DESDE ADMINISTRACIÓN (misma lógica que caja.html)
+   ══════════════════════════════════════════════════════════════ */
+function nuevaVentaAdmin() { return { ticket: 'a-' + generarId(), items: [], medio: '' }; }
+let ventaAdmin = (() => { try { return JSON.parse(localStorage.getItem('kiosco_admin_venta')) || nuevaVentaAdmin(); } catch (e) { return nuevaVentaAdmin(); } })();
+let precioAutocompletadoAdmin = '';
+
+function guardarVentaAdmin() { try { localStorage.setItem('kiosco_admin_venta', JSON.stringify(ventaAdmin)); } catch (e) {} }
+
+function productoDelStock(nombre) {
+  const clave = normalizarNombre(nombre);
+  return datos.productos.find(p => normalizarNombre(p.nombre) === clave);
+}
+
+// Igual que el servidor: si el nombre empieza con una palabra clave, toma esa categoría
+function detectarCategoria(nombre) {
+  const texto = ' ' + normalizarNombre(nombre);
+  const textoJunto = ' ' + normalizarNombre(nombre).replace(/ /g, '');
+  for (const p of datos.palabras) {
+    const palabra = normalizarNombre(p.palabra);
+    if (!palabra) continue;
+    if (texto.includes(' ' + palabra) || texto.includes(' ' + palabra.replace(/ /g, '')) || textoJunto.indexOf(' ' + palabra.replace(/ /g, '')) === 0) {
+      return String(p.categoria || 'VARIOS').toUpperCase();
+    }
+  }
+  return 'VARIOS';
+}
+
+function dibujarListaProductosVenta() {
+  document.getElementById('listaProductosVenta').innerHTML = datos.productos
+    .slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+    .map(p => `<option value="${escapar(p.nombre)}">${escapar(p.categoria)} · ${pesos(p.precio)}</option>`).join('');
+}
+
+function alCambiarProductoAdmin() {
+  const form = document.getElementById('formItemVenta');
+  const nombre = form.elements.producto.value.trim();
+  const info = document.getElementById('infoProductoVenta');
+  if (!nombre) {
+    if (form.elements.precio.value === precioAutocompletadoAdmin) form.elements.precio.value = '';
+    precioAutocompletadoAdmin = '';
+    info.innerHTML = '';
+    return;
+  }
+  const existente = productoDelStock(nombre);
+  if (existente) {
+    if (!form.elements.precio.value || form.elements.precio.value === precioAutocompletadoAdmin) {
+      form.elements.precio.value = existente.precio || '';
+      precioAutocompletadoAdmin = form.elements.precio.value;
+    }
+    info.innerHTML = `${etiquetaCategoria(existente.categoria)} <span>Precio en stock: ${pesos(existente.precio)}</span>`;
+  } else {
+    const sugerida = detectarCategoria(nombre);
+    const opciones = [...new Set([sugerida, ...categoriasConocidas()])];
+    info.innerHTML = `<span class="etiqueta-cat nuevo">NUEVO</span> Se agrega al stock como
+      <select id="categoriaNuevoAdmin">${opciones.map(c => `<option ${c === sugerida ? 'selected' : ''}>${escapar(c)}</option>`).join('')}</select>`;
+  }
+}
+
+function agregarItemAdmin(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const nombre = form.elements.producto.value.trim().replace(/\s+/g, ' ');
+  const cantidad = redondear(num(form.elements.cantidad.value));
+  const precio = redondear(num(form.elements.precio.value));
+  if (!nombre || cantidad <= 0 || precio <= 0) { mostrarAviso('Completá producto, cantidad y precio', true); return; }
+  const existente = productoDelStock(nombre);
+  const select = document.getElementById('categoriaNuevoAdmin');
+  const categoria = existente ? existente.categoria : (select ? select.value : detectarCategoria(nombre));
+  ventaAdmin.items.push({ producto: existente ? existente.nombre : nombre, cantidad, precio, categoria, nuevo: !existente });
+  guardarVentaAdmin();
+  form.reset();
+  form.elements.cantidad.value = 1;
+  precioAutocompletadoAdmin = '';
+  document.getElementById('infoProductoVenta').innerHTML = '';
+  form.elements.producto.focus();
+  dibujarVentaAdmin();
+}
+
+function dibujarVentaAdmin() {
+  const monto = ventaAdmin.items.reduce((t, i) => t + i.cantidad * i.precio, 0);
+  document.getElementById('itemsVentaAdmin').innerHTML = ventaAdmin.items.map((item, i) => `
+    <div class="item-venta">
+      <div><b>${escapar(item.producto)}</b> ${etiquetaCategoria(item.categoria)} ${item.nuevo ? '<span class="etiqueta-cat nuevo">NUEVO</span>' : ''}
+        <div class="detalle">${item.cantidad} × ${pesos(item.precio)}</div></div>
+      <div class="monto">${pesos(item.cantidad * item.precio)}</div>
+      <button class="quitar" data-quitar-admin="${i}" title="Quitar">✕</button>
+    </div>`).join('');
+  document.getElementById('montoVentaAdmin').classList.toggle('oculto', !ventaAdmin.items.length);
+  document.getElementById('textoMontoVentaAdmin').textContent = pesos(monto);
+  document.querySelectorAll('[data-medio-admin]').forEach(b => b.classList.toggle('elegido', b.dataset.medioAdmin === ventaAdmin.medio));
+  document.getElementById('botonRegistrarVentaAdmin').disabled = !ventaAdmin.items.length || !ventaAdmin.medio;
+}
+
+async function registrarVentaAdmin() {
+  const boton = document.getElementById('botonRegistrarVentaAdmin');
+  boton.disabled = true;
+  boton.textContent = 'Registrando…';
+  try {
+    await llamarApi('registrarVenta', { datos: {
+      ticket: ventaAdmin.ticket, medio: ventaAdmin.medio,
+      items: ventaAdmin.items.map(i => ({ producto: i.producto, cantidad: i.cantidad, precio: i.precio, categoria: i.categoria }))
+    } });
+    const nuevos = ventaAdmin.items.filter(i => i.nuevo);
+    ventaAdmin = nuevaVentaAdmin();
+    guardarVentaAdmin();
+    document.getElementById('errorVentaAdmin').classList.add('oculto');
+    mostrarAviso('Venta registrada ✓');
+    if (esAdmin()) {
+      // Se vuelven a leer las ventas (y el stock si se crearon productos nuevos)
+      if (nuevos.length) {
+        const recibido = await llamarApi('listarTodo');
+        datos.productos = recibido.productos || datos.productos;
+      }
+      if (mesSeleccionado === fechaLocal().slice(0, 7)) await cargarVentasMes();
+      else dibujarTodo();
+    } else {
+      nuevos.forEach(i => { if (!productoDelStock(i.producto)) datos.productos.push({ nombre: i.producto, categoria: i.categoria, precio: i.precio }); });
+      dibujarListaProductosVenta();
+      cargarMisVentas();
+    }
+  } catch (e) {
+    // Se conserva el mismo ticket: si se reintenta, no se duplica
+    const caja = document.getElementById('errorVentaAdmin');
+    caja.textContent = 'No se pudo registrar: ' + e.message + '. Tocá "Registrar venta" de nuevo.';
+    caja.classList.remove('oculto');
+  } finally {
+    boton.textContent = 'Registrar venta';
+    dibujarVentaAdmin();
+  }
+}
+
+// Debajo del formulario: lo vendido hoy (todos los vendedores), con totales
+function dibujarVentasHoy() {
+  const hoy = fechaLocal();
+  const lineas = mesSeleccionado === hoy.slice(0, 7) ? ventasMes.filter(v => v.fecha === hoy) : [];
+  const t = totalizarVentas(lineas);
+  document.getElementById('indicadoresHoy').innerHTML = `
+    <div class="indicador"><div class="etiqueta">💵 Efectivo</div><div class="valor">${pesos(t.efectivo)}</div><div class="detalle">Sin puchos</div></div>
+    <div class="indicador"><div class="etiqueta">📱 Mercado Pago</div><div class="valor">${pesos(t.mercadoPago)}</div><div class="detalle">Sin puchos</div></div>
+    <div class="indicador puchos"><div class="etiqueta">🚬 Puchos</div><div class="valor">${pesos(t.puchosEfectivo + t.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(t.puchosEfectivo)} · MP ${pesos(t.puchosMercadoPago)}</div></div>
+    <div class="indicador"><div class="etiqueta">Total de hoy</div><div class="valor">${pesos(t.total)}</div><div class="detalle">${t.cantidadVentas} ventas</div></div>`;
+  const tickets = agruparTickets(lineas).slice(0, 15);
+  document.getElementById('tablaVentasHoy').innerHTML = tickets.length ? `<table>
+    <thead><tr><th>Hora</th><th>Vendedor</th><th>Productos</th><th>Medio</th><th class="num">Monto</th></tr></thead>
+    <tbody>${tickets.map(tk => `<tr><td>${escapar(tk.hora)}</td><td>${escapar(tk.vendedor)}</td>
+      <td>${tk.items.map(i => `${num(i.cantidad)} × ${escapar(i.producto)}`).join(' · ')}</td>
+      <td>${escapar(tk.medio)}</td><td class="num"><b>${pesos(tk.monto)}</b></td></tr>`).join('')}</tbody></table>
+    <p class="nota">Se muestran las últimas 15. El detalle completo (y anular ventas) está en <b>Ventas</b>.</p>`
+    : '<p class="vacio">Todavía no hay ventas hoy.</p>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INGRESO: equipo autorizado, clave y sesión del día
+   ══════════════════════════════════════════════════════════════ */
+const NOMBRE_ROLES = { admin: 'Administración', gerente: 'Gerente', empleado: 'Empleado' };
+
+function mostrarPantalla(cual) {
+  document.getElementById('pantallaEquipo').classList.toggle('oculto', cual !== 'equipo');
+  document.getElementById('pantallaIngreso').classList.toggle('oculto', cual !== 'ingreso');
+  const enApp = cual === 'app';
+  document.body.classList.toggle('sin-menu', !enApp);
+  document.body.classList.remove('menu-abierto');
+  if (!enApp) {
+    document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+    document.getElementById('cargando').classList.add('oculto');
+    document.getElementById('tituloSeccion').textContent = '🏪 Maxi Kiosco lo de Diego';
+  }
+  if (cual === 'ingreso') setTimeout(() => document.querySelector('#formIngreso [name=clave]').focus(), 50);
+}
+
+function sesionVigente() { return sesion && sesion.sesion && sesion.vence > Date.now(); }
+
+// Al cerrar la sesión se recarga la página: no queda nada en pantalla (ni oculto) de quien estaba antes
+function cerrarSesionLocal(mensaje) {
+  sesion = null;
+  guardarLocal('kiosco_sesion', null);
+  if (mensaje) { try { sessionStorage.setItem('kiosco_mensaje_ingreso', mensaje); } catch (e) {} }
+  location.reload();
+}
+
+// Muestra u oculta todo lo marcado con data-roles según quién entró
+function aplicarRol() {
+  document.querySelectorAll('[data-roles]').forEach(el => {
+    el.classList.toggle('no-rol', !sesion || !el.dataset.roles.split(' ').includes(sesion.rol));
+  });
+}
+
+async function autorizarEquipo(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const boton = form.querySelector('button[type=submit]');
+  boton.disabled = true;
+  try {
+    const r = await llamarApi('autorizarEquipo', { nombre: form.elements.nombre.value.trim(), claveAdmin: form.elements.claveAdmin.value });
+    guardarLocal('kiosco_equipo', r.equipo);
+    form.elements.claveAdmin.value = '';
+    document.getElementById('errorEquipo').classList.add('oculto');
+    mostrarAviso('Equipo autorizado. Ahora ingresá tu clave.');
+    mostrarPantalla('ingreso');
+  } catch (e) {
+    document.getElementById('errorEquipo').textContent = e.message;
+    document.getElementById('errorEquipo').classList.remove('oculto');
+  } finally { boton.disabled = false; }
+}
+
+async function ingresar(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const boton = form.querySelector('button[type=submit]');
+  boton.disabled = true;
+  try {
+    sesion = await llamarApi('ingresar', { clave: form.elements.clave.value });
+    guardarLocal('kiosco_sesion', sesion);
+    form.elements.clave.value = '';
+    document.getElementById('errorIngreso').classList.add('oculto');
+    document.getElementById('textoIngreso').textContent = 'Hay que ingresarla todos los días a partir de las 8.';
+    abrirApp();
+  } catch (e) {
+    if (!document.getElementById('pantallaEquipo').classList.contains('oculto')) return;   // pasó a "autorizar equipo"
+    document.getElementById('errorIngreso').textContent = e.message;
+    document.getElementById('errorIngreso').classList.remove('oculto');
+  } finally { boton.disabled = false; }
+}
+
+function abrirApp() {
+  document.getElementById('textoUsuario').innerHTML = `${escapar(sesion.nombre)}<small>${NOMBRE_ROLES[sesion.rol]}</small>`;
+  document.getElementById('nombreVendedor').textContent = sesion.nombre;
+  aplicarRol();
+  mostrarPantalla('app');
+  dibujarVentaAdmin();
+  if (esAdmin()) {
+    let vista = 'resumen';
+    try { vista = localStorage.getItem('kiosco_vista') || 'resumen'; } catch (e) {}
+    cambiarVista(vista);
+    cargarTodo();
+  } else {
+    cambiarVista('vender');
+    cargarCatalogoCaja();
+    cargarMisVentas();
+  }
+}
+
+function iniciarSegunEstado() {
+  if (sesionVigente()) return abrirApp();
+  guardarLocal('kiosco_sesion', null);
+  sesion = null;
+  mostrarPantalla('ingreso');
+  try {
+    const mensaje = sessionStorage.getItem('kiosco_mensaje_ingreso');
+    if (mensaje) { document.getElementById('textoIngreso').innerHTML = mensaje; sessionStorage.removeItem('kiosco_mensaje_ingreso'); }
+  } catch (e) {}
+}
+
+// Gerente y empleado no leen la planilla entera: solo el stock y las palabras clave
+async function cargarCatalogoCaja() {
+  try {
+    const c = await llamarApi('datosVenta');
+    datos.productos = c.productos || [];
+    datos.palabras = c.palabras || [];
+    dibujarListaProductosVenta();
+  } catch (e) { mostrarAviso('No se pudo leer el stock: ' + e.message, true); }
+}
+
+/* Gerente y empleado: solo el monto de cada venta, nunca el total */
+async function cargarMisVentas() {
+  const contenedor = document.getElementById('listaMisVentas');
+  document.getElementById('notaMisVentas').textContent = sesion.rol === 'empleado'
+    ? 'Tus ventas de este turno.' : 'Ventas desde el último cierre de caja.';
+  try {
+    const ventas = await llamarApi('misVentas');
+    contenedor.innerHTML = ventas.length ? ventas.map(v => `
+      <div class="venta-registrada">
+        <div class="hora">${escapar(v.hora)}<br><small>${fechaLinda(v.fecha).slice(0, 5)}</small></div>
+        <div><div class="productos">${v.items.map(i => `${num(i.cantidad)} × ${escapar(i.producto)}`).join(' · ')}</div>
+          <div class="medio-chico">${escapar(v.medio)}${sesion.rol === 'gerente' ? ' · ' + escapar(v.vendedor) : ''}</div></div>
+        <div class="monto">${pesos(v.monto)}</div>
+      </div>`).join('') : '<p class="vacio">Todavía no hay ventas registradas.</p>';
+  } catch (e) {
+    contenedor.innerHTML = `<p class="vacio">No se pudieron cargar las ventas (${escapar(e.message)}).</p>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ME RETIRO (todos): registra lo vendido y cierra la sesión
+   ══════════════════════════════════════════════════════════════ */
+async function meRetiro() {
+  if (ventaAdmin.items.length) { mostrarAviso('Tenés una venta sin registrar. Registrala o quitá los productos antes de irte.', true); cambiarVista('vender'); return; }
+  if (!confirm(`${sesion.nombre}, ¿terminás tu turno ahora?`)) return;
+  const boton = document.getElementById('botonRetiro');
+  boton.disabled = true;
+  // El ID se guarda: si se corta internet y se reintenta, no se registra dos veces
+  const idRetiro = leerLocal('kiosco_retiro_pendiente') || ('r-' + generarId());
+  guardarLocal('kiosco_retiro_pendiente', idRetiro);
+  try {
+    await llamarApi('registrarRetiro', { datos: { id: idRetiro } });   // el servidor también cierra la sesión
+    guardarLocal('kiosco_retiro_pendiente', null);
+    const nombre = sesion.nombre;
+    cerrarSesionLocal(`✓ <b>Turno terminado, ${escapar(nombre)}.</b> Para volver a entrar, ingresá tu clave.`);
+  } catch (e) {
+    mostrarAviso('No se pudo registrar el retiro: ' + e.message + '. Probá de nuevo.', true);
+  } finally { boton.disabled = false; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CIERRE DE CAJA AUTOMÁTICO (gerente y administración)
+   ══════════════════════════════════════════════════════════════ */
+let resumenActual = null;
+
+async function cargarResumenCaja() {
+  const contenedor = document.getElementById('resumenCaja');
+  contenedor.innerHTML = '<p class="vacio">Cargando…</p>';
+  try {
+    resumenActual = await llamarApi('resumenCaja');
+    const r = resumenActual;
+    contenedor.innerHTML = `
+      <div class="indicador"><div class="etiqueta">💵 Efectivo</div><div class="valor">${pesos(r.efectivo)}</div><div class="detalle">Sin puchos</div></div>
+      <div class="indicador"><div class="etiqueta">📱 Mercado Pago</div><div class="valor">${pesos(r.mercadoPago)}</div><div class="detalle">Sin puchos</div></div>
+      <div class="indicador puchos"><div class="etiqueta">🚬 Puchos</div><div class="valor">${pesos(r.puchosEfectivo + r.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(r.puchosEfectivo)} · MP ${pesos(r.puchosMercadoPago)}</div></div>
+      <div class="indicador"><div class="etiqueta">Total vendido</div><div class="valor">${pesos(r.total)}</div><div class="detalle">${r.cantidadVentas} ventas</div></div>`;
+    document.getElementById('notaResumen').textContent = r.desde ? `Desde las ${r.desde.split(' ')[1]} del ${fechaLinda(r.desde.split(' ')[0]).slice(0, 5)}.` : 'No hay ventas nuevas desde el último cierre.';
+    const f = document.getElementById('formCierreAuto').elements;
+    if (f.fondoInicial.value === '' && num(r.fondoSugerido) > 0) f.fondoInicial.value = r.fondoSugerido;
+    calcularCierreAuto();
+  } catch (e) {
+    contenedor.innerHTML = `<p class="vacio">No se pudo cargar (${escapar(e.message)}).</p>`;
+  }
+}
+
+function calcularCierreAuto() {
+  const f = document.getElementById('formCierreAuto').elements;
+  const r = resumenActual || { efectivo: 0, puchosEfectivo: 0 };
+  const esperado = redondear(num(f.fondoInicial.value) + r.efectivo + r.puchosEfectivo - num(f.pagosDesdeCaja.value) - num(f.retiros.value));
+  document.getElementById('calcEsperadoAuto').textContent = pesos(esperado);
+  const celda = document.getElementById('calcDiferenciaAuto');
+  if (f.efectivoContado.value === '') { celda.textContent = '—'; celda.className = ''; return; }
+  const dif = redondear(num(f.efectivoContado.value) - esperado);
+  celda.textContent = (dif > 0 ? '+' : '') + pesos(dif) + (dif === 0 ? ' ✓' : dif > 0 ? ' (sobra)' : ' (falta)');
+  celda.className = dif < 0 ? 'negativo' : 'positivo';
+}
+
+async function enviarCierreAuto(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const datosCierre = {};
+  for (const campo of form.elements) if (campo.name) datosCierre[campo.name] = campo.value.trim();
+  const errores = [];
+  if (datosCierre.efectivoContado === '') errores.push('Falta el efectivo contado.');
+  if (num(datosCierre.pagosDesdeCaja) > 0 && !datosCierre.detallePagosCaja) errores.push('Contá qué se pagó con la caja.');
+  if (num(datosCierre.fondoSiguiente) > num(datosCierre.efectivoContado)) errores.push('El cambio que queda no puede ser más que el efectivo contado.');
+  const cajaError = document.getElementById('errorCierreAuto');
+  if (errores.length) { cajaError.innerHTML = errores.map(escapar).join('<br>'); cajaError.classList.remove('oculto'); return; }
+  cajaError.classList.add('oculto');
+  if (!confirm('¿Enviar el cierre de caja? Las ventas registradas hasta ahora quedan incluidas.')) return;
+
+  const boton = form.querySelector('button[type=submit]');
+  boton.disabled = true;
+  datosCierre.id = leerLocal('kiosco_cierre_pendiente') || ('c-' + generarId());
+  guardarLocal('kiosco_cierre_pendiente', datosCierre.id);
+  try {
+    const r = await llamarApi('enviarCierre', { datos: datosCierre });
+    guardarLocal('kiosco_cierre_pendiente', null);
+    form.reset();
+    mostrarAviso(r.yaRegistrado ? 'Ese cierre ya estaba enviado' : `Cierre enviado · diferencia ${pesos(r.diferencia)}`);
+    cargarResumenCaja();
+    if (esAdmin()) cargarTodo(); else cargarMisVentas();
+  } catch (e) {
+    cajaError.textContent = 'No se pudo enviar: ' + e.message + '. Probá de nuevo (no se duplica).';
+    cajaError.classList.remove('oculto');
+  } finally { boton.disabled = false; }
+}
+
+/* ══════════════════════════════════════════════════════════════
    STOCK (catálogo de productos) Y CATEGORÍAS AUTOMÁTICAS
    ══════════════════════════════════════════════════════════════ */
 function normalizarNombre(texto) {
@@ -1639,14 +2138,17 @@ function dibujarGrafico() {
    NAVEGACIÓN Y DIBUJO GENERAL
    ══════════════════════════════════════════════════════════════ */
 function cambiarVista(nombre) {
+  const boton = document.querySelector(`#pestanias [data-vista="${nombre}"]`);
+  if (!sesion || !boton || !boton.dataset.roles.split(' ').includes(sesion.rol)) nombre = esAdmin() ? 'resumen' : 'vender';
   document.querySelectorAll('.vista').forEach(v => v.classList.toggle('activa', v.id === 'vista-' + nombre));
   document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
-  try { localStorage.setItem('kiosco_vista', nombre); } catch (e) {}
-  const boton = document.querySelector(`#pestanias [data-vista="${nombre}"]`);
-  if (boton) document.getElementById('tituloSeccion').textContent = boton.querySelector('.texto-menu').textContent;
+  if (esAdmin()) { try { localStorage.setItem('kiosco_vista', nombre); } catch (e) {} }
+  const botonActivo = document.querySelector(`#pestanias [data-vista="${nombre}"]`);
+  document.getElementById('tituloSeccion').textContent = botonActivo.querySelector('.texto-menu').textContent;
   document.body.classList.remove('menu-abierto');   // en el celular, elegir una sección cierra el menú
   window.scrollTo(0, 0);
-  if (nombre === 'graficos' && configuracion.url) cargarGraficos();
+  if (nombre === 'graficos' && esAdmin()) cargarGraficos();
+  if (nombre === 'caja') cargarResumenCaja();
 }
 
 // ☰: en compu achica/agranda la columna (y lo recuerda); en el celular la despliega
@@ -1660,12 +2162,6 @@ function alternarMenu() {
   }
 }
 
-function actualizarInsignia() {
-  const insignia = document.getElementById('insigniaConexion');
-  if (configuracion.url) { insignia.textContent = '● Google Sheets'; insignia.className = 'insignia'; }
-  else { insignia.textContent = 'Sin conectar'; insignia.className = 'insignia local'; }
-}
-
 function dibujarTodo() {
   document.getElementById('listaProveedores').innerHTML = nombresProveedores().map(n => `<option value="${escapar(n)}">`).join('');
   dibujarResumen();
@@ -1677,6 +2173,8 @@ function dibujarTodo() {
   dibujarGastos();
   dibujarAgenda();
   dibujarVentas();
+  dibujarListaProductosVenta();
+  dibujarVentasHoy();
   dibujarRetiros();
   dibujarStock();
   dibujarPalabras();
@@ -1712,7 +2210,6 @@ function iniciar() {
   document.getElementById('botonMenu').addEventListener('click', alternarMenu);
   document.getElementById('velo').addEventListener('click', () => document.body.classList.remove('menu-abierto'));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') document.body.classList.remove('menu-abierto'); });
-  try { const vista = localStorage.getItem('kiosco_vista'); if (vista) cambiarVista(vista); } catch (e) {}
 
   // Formularios
   Object.keys(FORMULARIOS).forEach(idForm => {
@@ -1721,6 +2218,25 @@ function iniciar() {
     form.querySelector('[data-cancelar]').addEventListener('click', () => limpiarFormulario(idForm));
     FORMULARIOS[idForm].porDefecto(form);
   });
+  // Registrar venta
+  const formItemVenta = document.getElementById('formItemVenta');
+  formItemVenta.addEventListener('submit', agregarItemAdmin);
+  formItemVenta.elements.producto.addEventListener('input', alCambiarProductoAdmin);
+  document.getElementById('itemsVentaAdmin').addEventListener('click', e => {
+    const b = e.target.closest('[data-quitar-admin]');
+    if (!b) return;
+    ventaAdmin.items.splice(Number(b.dataset.quitarAdmin), 1);
+    guardarVentaAdmin();
+    dibujarVentaAdmin();
+  });
+  document.querySelectorAll('[data-medio-admin]').forEach(b => b.addEventListener('click', () => {
+    ventaAdmin.medio = b.dataset.medioAdmin;
+    guardarVentaAdmin();
+    dibujarVentaAdmin();
+  }));
+  document.getElementById('botonRegistrarVentaAdmin').addEventListener('click', registrarVentaAdmin);
+  dibujarVentaAdmin();
+
   document.getElementById('formCierre').addEventListener('input', calcularCierre);
   document.getElementById('botonTraerPagos').addEventListener('click', traerPagosDeCaja);
   const formPago = document.getElementById('formPago');
@@ -1746,27 +2262,19 @@ function iniciar() {
     }
   });
 
-  // Configuración
-  const dialogo = document.getElementById('dialogoConfig');
-  document.getElementById('botonConfig').addEventListener('click', () => {
-    document.getElementById('configUrl').value = configuracion.url;
-    document.getElementById('configClave').value = configuracion.clave;
-    dialogo.showModal();
-  });
-  document.getElementById('botonCerrarConfig').addEventListener('click', () => dialogo.close());
-  document.getElementById('botonGuardarConfig').addEventListener('click', async () => {
-    guardarConfiguracion({
-      url: document.getElementById('configUrl').value.trim(),
-      clave: document.getElementById('configClave').value
-    });
-    dialogo.close();
-    await cargarTodo();
-    if (configuracion.url) mostrarAviso('Conectado a Google Sheets');
-  });
-  document.getElementById('botonRecargar').addEventListener('click', cargarTodo);
+  // Ingreso, equipo, me retiro y cierre automático
+  document.getElementById('formEquipo').addEventListener('submit', autorizarEquipo);
+  document.getElementById('formIngreso').addEventListener('submit', ingresar);
+  document.getElementById('botonVolverIngreso').addEventListener('click', () => mostrarPantalla('ingreso'));
+  document.getElementById('botonRetiro').addEventListener('click', meRetiro);
+  document.getElementById('formCierreAuto').addEventListener('input', calcularCierreAuto);
+  document.getElementById('formCierreAuto').addEventListener('submit', enviarCierreAuto);
+  document.getElementById('botonActualizarResumen').addEventListener('click', cargarResumenCaja);
+  // A las 8 (o cuando venza) la sesión se cierra sola y pide la clave de nuevo
+  setInterval(() => { if (sesion && !sesionVigente()) cerrarSesionLocal('Nuevo día: ingresá tu clave.'); }, 30000);
 
-  if (configuracion.url) cargarTodo();
-  else { document.getElementById('cargando').classList.add('oculto'); actualizarInsignia(); dibujarTodo(); dialogo.showModal(); }
+  document.getElementById('botonRecargar').addEventListener('click', cargarTodo);
+  iniciarSegunEstado();
 }
 
 iniciar();
