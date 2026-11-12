@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caja · Maxi Kiosco lo de Diego</title>
+<style>
+  :root {
+    --fondo: #f5f3ee; --tarjeta: #fff; --texto: #1d2125; --suave: #6b7280; --borde: #e4e0d6;
+    --primario: #1f6f5c; --primario-oscuro: #17574a; --primario-claro: #e4f1ec;
+    --rojo: #b42318; --rojo-claro: #fdecea; --ambar: #a15c07; --ambar-claro: #fef3e2;
+    --verde: #1f7a3a; --azul: #0b5cad; --azul-claro: #e6f0fb; --radio: 14px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fondo); color: var(--texto); font-size: 16px; line-height: 1.4; }
+  header { background: var(--primario); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 10; }
+  header h1 { font-size: 18px; margin: 0; flex: 1; min-width: 180px; }
+  header .usuario { font-size: 14px; opacity: .9; }
+  .boton-cabecera { background: rgba(255,255,255,.18); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .boton-cabecera:hover { background: rgba(255,255,255,.3); }
+  .boton-cabecera.retiro { background: #fff; color: var(--rojo); }
+  nav { display: flex; gap: 2px; background: #fff; border-bottom: 1px solid var(--borde); padding: 0 8px; }
+  nav button { background: none; border: 0; padding: 13px 16px; font: inherit; color: var(--suave); cursor: pointer; border-bottom: 3px solid transparent; }
+  nav button.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px; margin-bottom: 16px; }
+  .centrado { max-width: 420px; margin: 40px auto; text-align: center; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  label { display: flex; flex-direction: column; gap: 5px; font-size: 14px; color: var(--suave); text-align: left; }
+  input, select, textarea { font: inherit; font-size: 17px; color: var(--texto); padding: 10px 12px; border: 1px solid var(--borde); border-radius: 10px; background: #fff; width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--primario-claro); border-color: var(--primario); }
+  .boton { border: 0; border-radius: 12px; padding: 13px 18px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; background: var(--primario); color: #fff; }
+  .boton:hover { background: var(--primario-oscuro); }
+  .boton:disabled { opacity: .5; cursor: not-allowed; }
+  .boton.ancho { width: 100%; }
+  .boton.secundario { background: #fff; color: var(--texto); border: 1px solid var(--borde); font-weight: 600; }
+  .grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .grilla .ancho { grid-column: 1 / -1; }
+  .error { background: var(--rojo-claro); color: var(--rojo); border-radius: 10px; padding: 12px; margin: 12px 0; font-size: 14px; text-align: left; }
+  .nota { font-size: 13px; color: var(--suave); }
+  .oculto { display: none !important; }
+
+  /* Carga de productos */
+  .fila-producto { display: grid; grid-template-columns: 1fr 90px 140px auto; gap: 10px; align-items: end; }
+  .fila-producto .boton { padding: 11px 16px; }
+  @media (max-width: 640px) { .fila-producto { grid-template-columns: 1fr 1fr; } .fila-producto .producto { grid-column: 1 / -1; } }
+  .info-producto { margin-top: 8px; font-size: 14px; color: var(--suave); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-height: 26px; }
+  .info-producto select { width: auto; font-size: 14px; padding: 4px 8px; }
+  .etiqueta { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; letter-spacing: .03em; }
+  .cat-PUCHOS { background: var(--ambar-claro); color: var(--ambar); }
+  .cat-otra { background: var(--primario-claro); color: var(--primario); }
+  .etiqueta.nuevo { background: var(--azul-claro); color: var(--azul); }
+
+  .items { margin-top: 14px; border-top: 1px solid var(--borde); }
+  .item { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--borde); }
+  .item .detalle { font-size: 14px; color: var(--suave); }
+  .item .monto { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .quitar { background: none; border: 0; color: var(--rojo); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .monto-venta { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; padding: 14px 0 4px; }
+  .medios { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .medio { border: 2px solid var(--borde); background: #fff; border-radius: 12px; padding: 14px; font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; color: var(--texto); }
+  .medio.elegido { border-color: var(--primario); background: var(--primario-claro); color: var(--primario); }
+
+  .venta-registrada { display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: start; }
+  .venta-registrada .hora { font-size: 14px; color: var(--suave); font-variant-numeric: tabular-nums; }
+  .venta-registrada .productos { font-size: 14px; }
+  .venta-registrada .medio-chico { font-size: 12px; color: var(--suave); }
+  .venta-registrada .monto { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .vacio { color: var(--suave); padding: 12px 0; }
+
+  .indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; }
+  .indicador .titulo { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
+  .indicador .valor { font-size: 21px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .indicador .detalle { font-size: 12px; color: var(--suave); margin-top: 2px; }
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 14px; padding: 12px; border-radius: 10px; background: #f7f6f2; }
+  .calculo span { display: block; font-size: 12px; color: var(--suave); }
+  .calculo strong { font-size: 19px; font-variant-numeric: tabular-nums; }
+  .positivo { color: var(--verde); } .negativo { color: var(--rojo); }
+
+  #avisos { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 8px; }
+  .aviso { background: #1d2125; color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 15px; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+  .aviso.error-aviso { background: var(--rojo); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏪 Maxi Kiosco lo de Diego</h1>
+  <span class="usuario oculto" id="textoUsuario"></span>
+  <button class="boton-cabecera retiro oculto" id="botonRetiro">Me retiro</button>
+</header>
+<nav id="pestanias" class="oculto">
+  <button data-vista="ventas" class="activa">Registrar ventas</button>
+  <button data-vista="cierre">Cierre de caja</button>
+</nav>
+
+<main>
+  <!-- ═════════ EQUIPO NO AUTORIZADO ═════════ -->
+  <section id="pantallaEquipo" class="tarjeta centrado oculto">
+    <h2>🔒 Este equipo no está autorizado</h2>
+    <p class="nota">Esta caja solo funciona en los equipos que autorice la administración. Se hace una sola vez por equipo.</p>
+    <form id="formEquipo" autocomplete="off">
+      <div class="grilla">
+        <label class="ancho">Nombre para este equipo <input name="nombre" value="Compu del kiosco" required></label>
+        <label class="ancho">Clave de administración <input name="claveAdmin" type="password" required></label>
+      </div>
+      <div id="errorEquipo" class="error oculto"></div>
+      <br><button class="boton ancho" type="submit">Autorizar este equipo</button>
+    </form>
+  </section>
+
+  <!-- ═════════ INGRESO DIARIO ═════════ -->
+  <section id="pantallaIngreso" class="tarjeta centrado oculto">
+    <h2>Ingresá tu clave</h2>
+    <p class="nota" id="textoIngreso">Hay que ingresarla todos los días a partir de las 8.</p>
+    <form id="formIngreso" autocomplete="off">
+      <input name="clave" type="password" placeholder="Clave" required autofocus style="text-align:center;font-size:22px">
+      <div id="errorIngreso" class="error oculto"></div>
+      <br><button class="boton ancho" type="submit">Entrar</button>
+    </form>
+  </section>
+
+  <!-- ═════════ REGISTRAR VENTAS ═════════ -->
+  <section id="vista-ventas" class="vista oculto">
+    <div class="tarjeta">
+      <h2>Nueva venta</h2>
+      <form id="formProducto" autocomplete="off">
+        <div class="fila-producto">
+          <label class="producto">Producto <input name="producto" list="listaProductos" placeholder="Escribí o elegí un producto" required></label>
+          <label>Cantidad <input name="cantidad" type="number" min="0.01" step="any" value="1" inputmode="decimal" required></label>
+          <label>Precio c/u <input name="precio" type="number" min="0.01" step="0.01" inputmode="decimal" required></label>
+          <button class="boton" type="submit">+ Agregar</button>
+        </div>
+        <div class="info-producto" id="infoProducto"></div>
+      </form>
+
+      <div class="items" id="itemsVenta"></div>
+      <div class="monto-venta oculto" id="montoVenta"><span>Monto de esta venta</span><span id="textoMontoVenta"></span></div>
+
+      <div class="medios">
+        <button type="button" class="medio" data-medio="Efectivo">💵 Efectivo</button>
+        <button type="button" class="medio" data-medio="Mercado Pago">📱 Mercado Pago</button>
+      </div>
+      <div id="errorVenta" class="error oculto"></div>
+      <button class="boton ancho" id="botonRegistrarVenta" disabled>Registrar venta</button>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Ventas registradas</h2>
+      <p class="nota" id="notaVentas" style="margin-top:-6px"></p>
+      <div id="listaVentas"><p class="vacio">Cargando…</p></div>
+    </div>
+  </section>
+
+  <!-- ═════════ CIERRE DE CAJA (gerente) ═════════ -->
+  <section id="vista-cierre" class="vista oculto">
+    <div class="tarjeta">
+      <h2>Lo vendido desde el último cierre</h2>
+      <p class="nota" id="notaResumen" style="margin-top:-6px"></p>
+      <div class="indicadores" id="resumenCaja"></div>
+      <button class="boton secundario" id="botonActualizarResumen">⟳ Actualizar</button>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Cerrar la caja</h2>
+      <form id="formCierre" autocomplete="off">
+        <div class="grilla">
+          <label>Turno
+            <select name="turno"><option>Mañana</option><option>Tarde</option><option>Noche</option><option>Día completo</option></select>
+          </label>
+          <label>Fondo inicial (cambio) <input name="fondoInicial" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Pagos hechos con la caja <input name="pagosDesdeCaja" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>¿Qué se pagó? <input name="detallePagosCaja" placeholder="Ej: Coca $15.000, sodero $4.000"></label>
+          <label>Retiros (al dueño, depósitos) <input name="retiros" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Efectivo contado <input name="efectivoContado" type="number" min="0" step="0.01" inputmode="decimal" required></label>
+          <label>Cambio que queda para el próximo turno <input name="fondoSiguiente" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label class="ancho">Observaciones <textarea name="observaciones" rows="2"></textarea></label>
+        </div>
+        <div class="calculo">
+          <div><span>Efectivo que debería haber</span><strong id="calcEsperado">$ 0</strong></div>
+          <div><span>Diferencia</span><strong id="calcDiferencia">—</strong></div>
+        </div>
+        <p class="nota">El efectivo esperado incluye puchos cobrados en efectivo: fondo + efectivo + puchos en efectivo − pagos − retiros.</p>
+        <div id="errorCierre" class="error oculto"></div>
+        <button class="boton ancho" type="submit">Enviar cierre de caja</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<datalist id="listaProductos"></datalist>
+<div id="avisos"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN — pegá acá la URL /exec de Apps Script
+   ══════════════════════════════════════════════════════════════ */
+const URL_API = '';
+
+/* ══════════════════════════════════════════════════════════════
+   ESTADO
+   ══════════════════════════════════════════════════════════════ */
+let sesion = leerLocal('kiosco_sesion');          // { sesion, rol, nombre, vence }
+let catalogo = { productos: [], palabras: [], categorias: ['PUCHOS', 'VARIOS'] };
+let mapaCatalogo = new Map();                      // nombre normalizado → producto
+let ventaActual = leerLocal('kiosco_venta_actual') || nuevaVenta();
+let productoAnteriorAutocompletado = '';
+
+function nuevaVenta() { return { ticket: generarId('t'), items: [], medio: '' }; }
+
+/* ══════════════════════════════════════════════════════════════
+   UTILIDADES
+   ══════════════════════════════════════════════════════════════ */
+const formatoPesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 });
+function pesos(n) { return formatoPesos.format(Number(n) || 0); }
+function num(v) { return Number(v) || 0; }
+function redondear(n) { return Math.round(n * 100) / 100; }
+function generarId(prefijo) { return prefijo + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapar(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function leerLocal(clave) { try { return JSON.parse(localStorage.getItem(clave)); } catch (e) { return null; } }
+function guardarLocal(clave, valor) { try { valor === null ? localStorage.removeItem(clave) : localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) {} }
+function mostrar(id, visible) { document.getElementById(id).classList.toggle('oculto', !visible); }
+function fechaLinda(t) { if (!t) return ''; const [a, m, d] = t.split('-'); return `${d}/${m}`; }
+
+function mostrarAviso(texto, esError = false) {
+  const div = document.createElement('div');
+  div.className = 'aviso' + (esError ? ' error-aviso' : '');
+  div.textContent = texto;
+  document.getElementById('avisos').appendChild(div);
+  setTimeout(() => div.remove(), esError ? 6000 : 2500);
+}
+
+// Igual que en el servidor: minúsculas, sin acentos ni signos
+function normalizar(texto) {
+  return String(texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9&]+/g, ' ').trim();
+}
+function detectarCategoria(nombre) {
+  const texto = ' ' + normalizar(nombre);
+  const textoJunto = ' ' + normalizar(nombre).replace(/ /g, '');
+  for (const p of catalogo.palabras) {
+    const palabra = normalizar(p.palabra);
+    if (!palabra) continue;
+    if (texto.includes(' ' + palabra) || texto.includes(' ' + palabra.replace(/ /g, '')) || textoJunto.indexOf(' ' + palabra.replace(/ /g, '')) === 0) {
+      return String(p.categoria || 'VARIOS').toUpperCase();
+    }
+  }
+  return 'VARIOS';
+}
+function etiquetaCategoria(cat) {
+  return `<span class="etiqueta ${cat === 'PUCHOS' ? 'cat-PUCHOS' : 'cat-otra'}">${escapar(cat)}</span>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMUNICACIÓN
+   ══════════════════════════════════════════════════════════════ */
+async function llamarApi(accion, extra = {}) {
+  if (!URL_API) throw new Error('Falta configurar URL_API en caja.html');
+  const respuesta = await fetch(URL_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // evita el preflight CORS
+    body: JSON.stringify({ accion, equipo: leerLocal('kiosco_equipo'), sesion: sesion && sesion.sesion, ...extra })
+  });
+  const json = await respuesta.json();
+  if (json.codigo === 'EQUIPO') { guardarLocal('kiosco_equipo', null); mostrarPantalla('equipo'); throw new Error(json.error); }
+  if (json.codigo === 'SESION') { cerrarSesionLocal(); throw new Error(json.error); }
+  if (!json.ok) throw new Error(json.error || 'Error desconocido');
+  return json.datos;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PANTALLAS, EQUIPO Y SESIÓN
+   ══════════════════════════════════════════════════════════════ */
+function mostrarPantalla(cual) {
+  mostrar('pantallaEquipo', cual === 'equipo');
+  mostrar('pantallaIngreso', cual === 'ingreso');
+  const enApp = cual === 'app';
+  mostrar('textoUsuario', enApp);
+  mostrar('botonRetiro', enApp);
+  mostrar('pestanias', enApp && sesion?.rol === 'gerente');
+  if (!enApp) { mostrar('vista-ventas', false); mostrar('vista-cierre', false); }
+  if (cual === 'ingreso') setTimeout(() => document.querySelector('#formIngreso [name=clave]').focus(), 50);
+}
+
+function sesionVigente() {
+  return sesion && sesion.sesion && sesion.vence > Date.now();
+}
+
+function cerrarSesionLocal() {
+  sesion = null;
+  guardarLocal('kiosco_sesion', null);
+  mostrarPantalla('ingreso');
+}
+
+async function autorizarEquipo(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const boton = form.querySelector('button');
+  boton.disabled = true;
+  try {
+    const r = await llamarApi('autorizarEquipo', { nombre: form.elements.nombre.value.trim(), claveAdmin: form.elements.claveAdmin.value });
+    guardarLocal('kiosco_equipo', r.equipo);
+    form.elements.claveAdmin.value = '';
+    mostrar('errorEquipo', false);
+    mostrarAviso('Equipo autorizado');
+    iniciarSegunEstado();
+  } catch (e) {
+    document.getElementById('errorEquipo').textContent = e.message;
+    mostrar('errorEquipo', true);
+  } finally { boton.disabled = false; }
+}
+
+async function ingresar(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const boton = form.querySelector('button');
+  boton.disabled = true;
+  try {
+    sesion = await llamarApi('ingresar', { clave: form.elements.clave.value });
+    guardarLocal('kiosco_sesion', sesion);
+    form.elements.clave.value = '';
+    mostrar('errorIngreso', false);
+    document.getElementById('textoIngreso').textContent = 'Hay que ingresarla todos los días a partir de las 8.';
+    abrirApp();
+  } catch (e) {
+    if (!document.getElementById('pantallaEquipo').classList.contains('oculto')) return;
+    document.getElementById('errorIngreso').textContent = e.message;
+    mostrar('errorIngreso', true);
+  } finally { boton.disabled = false; }
+}
+
+function abrirApp() {
+  document.getElementById('textoUsuario').textContent = `${sesion.nombre} · ${sesion.rol === 'gerente' ? 'Gerente' : 'Empleado'}`;
+  mostrarPantalla('app');
+  cambiarVista('ventas');
+  dibujarVentaActual();
+  cargarCatalogo();
+  cargarVentas();
+}
+
+function iniciarSegunEstado() {
+  if (!leerLocal('kiosco_equipo')) return mostrarPantalla('equipo');
+  if (!sesionVigente()) { guardarLocal('kiosco_sesion', null); sesion = null; return mostrarPantalla('ingreso'); }
+  abrirApp();
+}
+
+function cambiarVista(nombre) {
+  if (nombre === 'cierre' && sesion?.rol !== 'gerente') return;
+  mostrar('vista-ventas', nombre === 'ventas');
+  mostrar('vista-cierre', nombre === 'cierre');
+  document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
+  if (nombre === 'cierre') cargarResumenCaja();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CATÁLOGO (stock) Y CARGA DE PRODUCTOS
+   ══════════════════════════════════════════════════════════════ */
+async function cargarCatalogo() {
+  try {
+    catalogo = await llamarApi('datosVenta');
+    armarMapaCatalogo();
+  } catch (e) { mostrarAviso('No se pudo leer el stock: ' + e.message, true); }
+}
+
+function armarMapaCatalogo() {
+  mapaCatalogo = new Map(catalogo.productos.map(p => [normalizar(p.nombre), p]));
+  document.getElementById('listaProductos').innerHTML = catalogo.productos
+    .slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+    .map(p => `<option value="${escapar(p.nombre)}">${escapar(p.categoria)} · ${pesos(p.precio)}</option>`).join('');
+}
+
+// Al escribir el producto: si existe, completa el precio y muestra su categoría;
+// si es nuevo, sugiere la categoría y deja cambiarla
+function alCambiarProducto() {
+  const form = document.getElementById('formProducto');
+  const nombre = form.elements.producto.value.trim();
+  const info = document.getElementById('infoProducto');
+  if (!nombre) { info.innerHTML = ''; return; }
+  const existente = mapaCatalogo.get(normalizar(nombre));
+  if (existente) {
+    // Solo pisa el precio si estaba vacío o lo había puesto el autocompletado
+    if (!form.elements.precio.value || form.elements.precio.value === productoAnteriorAutocompletado) {
+      form.elements.precio.value = existente.precio || '';
+      productoAnteriorAutocompletado = form.elements.precio.value;
+    }
+    info.innerHTML = `${etiquetaCategoria(existente.categoria)} <span>Precio en stock: ${pesos(existente.precio)}</span>`;
+  } else {
+    const sugerida = detectarCategoria(nombre);
+    const opciones = [...new Set([sugerida, ...catalogo.categorias])];
+    info.innerHTML = `<span class="etiqueta nuevo">NUEVO</span> Se agrega al stock como
+      <select id="categoriaNuevo">${opciones.map(c => `<option ${c === sugerida ? 'selected' : ''}>${escapar(c)}</option>`).join('')}</select>`;
+  }
+}
+
+function agregarProducto(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const nombre = form.elements.producto.value.trim().replace(/\s+/g, ' ');
+  const cantidad = redondear(num(form.elements.cantidad.value));
+  const precio = redondear(num(form.elements.precio.value));
+  if (!nombre || cantidad <= 0 || precio <= 0) { mostrarAviso('Completá producto, cantidad y precio', true); return; }
+
+  const existente = mapaCatalogo.get(normalizar(nombre));
+  const selectCategoria = document.getElementById('categoriaNuevo');
+  const categoria = existente ? existente.categoria : (selectCategoria ? selectCategoria.value : detectarCategoria(nombre));
+  ventaActual.items.push({ producto: existente ? existente.nombre : nombre, cantidad, precio, categoria, nuevo: !existente });
+  guardarVentaActual();
+
+  form.reset();
+  form.elements.cantidad.value = 1;
+  productoAnteriorAutocompletado = '';
+  document.getElementById('infoProducto').innerHTML = '';
+  form.elements.producto.focus();
+  dibujarVentaActual();
+}
+
+function guardarVentaActual() { guardarLocal('kiosco_venta_actual', ventaActual); }
+
+function dibujarVentaActual() {
+  const contenedor = document.getElementById('itemsVenta');
+  const monto = ventaActual.items.reduce((t, i) => t + i.cantidad * i.precio, 0);
+  contenedor.innerHTML = ventaActual.items.map((item, i) => `
+    <div class="item">
+      <div><b>${escapar(item.producto)}</b> ${etiquetaCategoria(item.categoria)} ${item.nuevo ? '<span class="etiqueta nuevo">NUEVO</span>' : ''}
+        <div class="detalle">${item.cantidad} × ${pesos(item.precio)}</div></div>
+      <div class="monto">${pesos(item.cantidad * item.precio)}</div>
+      <button class="quitar" data-quitar="${i}" title="Quitar">✕</button>
+    </div>`).join('');
+  mostrar('montoVenta', ventaActual.items.length > 0);
+  document.getElementById('textoMontoVenta').textContent = pesos(monto);
+  document.querySelectorAll('.medio').forEach(b => b.classList.toggle('elegido', b.dataset.medio === ventaActual.medio));
+  document.getElementById('botonRegistrarVenta').disabled = !ventaActual.items.length || !ventaActual.medio;
+}
+
+async function registrarVenta() {
+  const boton = document.getElementById('botonRegistrarVenta');
+  boton.disabled = true;
+  boton.textContent = 'Registrando…';
+  try {
+    await llamarApi('registrarVenta', { datos: {
+      ticket: ventaActual.ticket, medio: ventaActual.medio,
+      items: ventaActual.items.map(i => ({ producto: i.producto, cantidad: i.cantidad, precio: i.precio, categoria: i.categoria }))
+    } });
+    // Los productos nuevos ya quedan en el stock para la próxima venta
+    ventaActual.items.filter(i => i.nuevo).forEach(i => {
+      if (!mapaCatalogo.has(normalizar(i.producto))) catalogo.productos.push({ nombre: i.producto, categoria: i.categoria, precio: i.precio });
+    });
+    armarMapaCatalogo();
+    ventaActual = nuevaVenta();
+    guardarVentaActual();
+    mostrar('errorVenta', false);
+    mostrarAviso('Venta registrada ✓');
+    dibujarVentaActual();
+    cargarVentas();
+  } catch (e) {
+    // Se conserva el mismo ticket: si se reintenta no se duplica
+    document.getElementById('errorVenta').textContent = 'No se pudo registrar: ' + e.message + '. Tocá "Registrar venta" de nuevo.';
+    mostrar('errorVenta', true);
+  } finally {
+    boton.textContent = 'Registrar venta';
+    dibujarVentaActual();
+  }
+}
+
+/* Lista de ventas: solo el monto de cada una, sin totales */
+async function cargarVentas() {
+  const contenedor = document.getElementById('listaVentas');
+  document.getElementById('notaVentas').textContent = sesion.rol === 'empleado'
+    ? 'Tus ventas de este turno.' : 'Ventas desde el último cierre de caja.';
+  try {
+    const ventas = await llamarApi('misVentas');
+    contenedor.innerHTML = ventas.length ? ventas.map(v => `
+      <div class="venta-registrada">
+        <div class="hora">${escapar(v.hora)}<br><small>${fechaLinda(v.fecha)}</small></div>
+        <div><div class="productos">${v.items.map(i => `${i.cantidad} × ${escapar(i.producto)}`).join(' · ')}</div>
+          <div class="medio-chico">${escapar(v.medio)}${sesion.rol === 'gerente' ? ' · ' + escapar(v.vendedor) : ''}</div></div>
+        <div class="monto">${pesos(v.monto)}</div>
+      </div>`).join('') : '<p class="vacio">Todavía no hay ventas registradas.</p>';
+  } catch (e) {
+    contenedor.innerHTML = `<p class="vacio">No se pudieron cargar las ventas (${escapar(e.message)}).</p>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ME RETIRO (gerente y empleado)
+   ══════════════════════════════════════════════════════════════ */
+async function meRetiro() {
+  if (ventaActual.items.length) { mostrarAviso('Tenés una venta sin registrar. Registrala o quitá los productos antes de irte.', true); return; }
+  if (!confirm(`${sesion.nombre}, ¿terminás tu turno ahora?`)) return;
+  const boton = document.getElementById('botonRetiro');
+  boton.disabled = true;
+  // El ID se guarda: si se corta internet y se reintenta, no se registra dos veces
+  const idRetiro = leerLocal('kiosco_retiro_pendiente') || generarId('r');
+  guardarLocal('kiosco_retiro_pendiente', idRetiro);
+  try {
+    await llamarApi('registrarRetiro', { datos: { id: idRetiro } });   // el servidor también cierra la sesión
+    guardarLocal('kiosco_retiro_pendiente', null);
+    const nombre = sesion.nombre;
+    document.getElementById('listaVentas').innerHTML = '';
+    cerrarSesionLocal();   // vuelve a la pantalla de clave
+    document.getElementById('textoIngreso').innerHTML = `✓ <b>Turno terminado, ${escapar(nombre)}.</b> Para volver a entrar, ingresá tu clave.`;
+  } catch (e) {
+    mostrarAviso('No se pudo registrar el retiro: ' + e.message + '. Probá de nuevo.', true);
+  } finally { boton.disabled = false; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GERENTE: CIERRE DE CAJA
+   ══════════════════════════════════════════════════════════════ */
+let resumenActual = null;
+
+async function cargarResumenCaja() {
+  const contenedor = document.getElementById('resumenCaja');
+  contenedor.innerHTML = '<p class="vacio">Cargando…</p>';
+  try {
+    resumenActual = await llamarApi('resumenCaja');
+    const r = resumenActual;
+    contenedor.innerHTML = `
+      <div class="indicador"><div class="titulo">💵 Efectivo</div><div class="valor">${pesos(r.efectivo)}</div><div class="detalle">Sin puchos</div></div>
+      <div class="indicador"><div class="titulo">📱 Mercado Pago</div><div class="valor">${pesos(r.mercadoPago)}</div><div class="detalle">Sin puchos</div></div>
+      <div class="indicador"><div class="titulo">🚬 Puchos</div><div class="valor">${pesos(r.puchosEfectivo + r.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(r.puchosEfectivo)} · MP ${pesos(r.puchosMercadoPago)}</div></div>
+      <div class="indicador"><div class="titulo">Total vendido</div><div class="valor">${pesos(r.total)}</div><div class="detalle">${r.cantidadVentas} ventas</div></div>`;
+    document.getElementById('notaResumen').textContent = r.desde ? `Desde ${r.desde.split(' ')[1]} del ${fechaLinda(r.desde.split(' ')[0])}.` : 'No hay ventas nuevas desde el último cierre.';
+    const form = document.getElementById('formCierre');
+    if (form.elements.fondoInicial.value === '' && num(r.fondoSugerido) > 0) form.elements.fondoInicial.value = r.fondoSugerido;
+    calcularCierre();
+  } catch (e) {
+    contenedor.innerHTML = `<p class="vacio">No se pudo cargar (${escapar(e.message)}).</p>`;
+  }
+}
+
+function calcularCierre() {
+  const f = document.getElementById('formCierre').elements;
+  const r = resumenActual || { efectivo: 0, puchosEfectivo: 0 };
+  const esperado = redondear(num(f.fondoInicial.value) + r.efectivo + r.puchosEfectivo - num(f.pagosDesdeCaja.value) - num(f.retiros.value));
+  document.getElementById('calcEsperado').textContent = pesos(esperado);
+  const celda = document.getElementById('calcDiferencia');
+  if (f.efectivoContado.value === '') { celda.textContent = '—'; celda.className = ''; return; }
+  const dif = redondear(num(f.efectivoContado.value) - esperado);
+  celda.textContent = (dif > 0 ? '+' : '') + pesos(dif) + (dif === 0 ? ' ✓' : dif > 0 ? ' (sobra)' : ' (falta)');
+  celda.className = dif < 0 ? 'negativo' : 'positivo';
+}
+
+async function enviarCierre(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const datos = {};
+  for (const campo of form.elements) if (campo.name) datos[campo.name] = campo.value.trim();
+  const errores = [];
+  if (datos.efectivoContado === '') errores.push('Falta el efectivo contado.');
+  if (num(datos.pagosDesdeCaja) > 0 && !datos.detallePagosCaja) errores.push('Contá qué se pagó con la caja.');
+  if (num(datos.fondoSiguiente) > num(datos.efectivoContado)) errores.push('El cambio que queda no puede ser más que el efectivo contado.');
+  const cajaError = document.getElementById('errorCierre');
+  if (errores.length) { cajaError.innerHTML = errores.map(escapar).join('<br>'); mostrar('errorCierre', true); return; }
+  mostrar('errorCierre', false);
+  if (!confirm('¿Enviar el cierre de caja? Las ventas registradas hasta ahora quedan incluidas.')) return;
+
+  const boton = form.querySelector('button[type=submit]');
+  boton.disabled = true;
+  datos.id = leerLocal('kiosco_cierre_pendiente') || generarId('c');
+  guardarLocal('kiosco_cierre_pendiente', datos.id);
+  try {
+    const r = await llamarApi('enviarCierre', { datos });
+    guardarLocal('kiosco_cierre_pendiente', null);
+    form.reset();
+    mostrarAviso(r.yaRegistrado ? 'Ese cierre ya estaba enviado' : `Cierre enviado · diferencia ${pesos(r.diferencia)}`);
+    cargarResumenCaja();
+    cargarVentas();
+  } catch (e) {
+    cajaError.textContent = 'No se pudo enviar: ' + e.message + '. Probá de nuevo (no se duplica).';
+    mostrar('errorCierre', true);
+  } finally { boton.disabled = false; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EVENTOS
+   ══════════════════════════════════════════════════════════════ */
+document.getElementById('formEquipo').addEventListener('submit', autorizarEquipo);
+document.getElementById('formIngreso').addEventListener('submit', ingresar);
+document.getElementById('formProducto').addEventListener('submit', agregarProducto);
+document.querySelector('#formProducto [name=producto]').addEventListener('input', alCambiarProducto);
+document.getElementById('botonRegistrarVenta').addEventListener('click', registrarVenta);
+document.getElementById('itemsVenta').addEventListener('click', e => {
+  const b = e.target.closest('[data-quitar]');
+  if (!b) return;
+  ventaActual.items.splice(Number(b.dataset.quitar), 1);
+  guardarVentaActual();
+  dibujarVentaActual();
+});
+document.querySelectorAll('.medio').forEach(b => b.addEventListener('click', () => {
+  ventaActual.medio = b.dataset.medio;
+  guardarVentaActual();
+  dibujarVentaActual();
+}));
+document.getElementById('pestanias').addEventListener('click', e => { if (e.target.dataset.vista) cambiarVista(e.target.dataset.vista); });
+document.getElementById('botonRetiro').addEventListener('click', meRetiro);
+document.getElementById('formCierre').addEventListener('input', calcularCierre);
+document.getElementById('formCierre').addEventListener('submit', enviarCierre);
+document.getElementById('botonActualizarResumen').addEventListener('click', cargarResumenCaja);
+
+// A las 8 (o cuando venza) la sesión se cierra sola y pide la clave de nuevo
+setInterval(() => { if (sesion && !sesionVigente()) { cerrarSesionLocal(); mostrarAviso('Nuevo día: ingresá tu clave'); } }, 30000);
+
+iniciarSegunEstado();
+</script>
+</body>
+</html>

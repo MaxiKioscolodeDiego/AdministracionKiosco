@@ -50,7 +50,7 @@
   }
   .insignia.local { background: #f4c26b; color: #3d2a00; }
   header input[type=month] {
-    border: 0; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px;
+    border: 0; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px; width: auto;
   }
   .boton-icono {
     background: rgba(255,255,255,.16); color: #fff; border: 0; border-radius: 8px;
@@ -142,6 +142,24 @@
   .aviso.error { background: var(--rojo); }
   .cargando { text-align: center; padding: 40px; color: var(--suave); }
   .oculto { display: none !important; }
+  .etiqueta-cat { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: .03em; background: var(--primario-claro); color: var(--primario); }
+  .etiqueta-cat.puchos { background: var(--ambar-claro); color: var(--ambar); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: #f1efe9; border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
+  .chip button { border: 0; background: none; color: var(--rojo); cursor: pointer; font-size: 14px; padding: 0 4px; }
+  .indicador.puchos { border-color: #f3d29a; background: #fffaf0; }
+  /* Gráficos */
+  .grafico-contenedor { position: relative; }
+  .grafico-contenedor svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .leyenda { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--suave); margin: 4px 0 10px; }
+  .leyenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .leyenda i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .tooltip-grafico { position: absolute; pointer-events: none; background: #fff; border: 1px solid var(--borde); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.12); min-width: 210px; z-index: 5; }
+  .tooltip-grafico .fila { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+  .tooltip-grafico .fila b { font-variant-numeric: tabular-nums; }
+  .tooltip-grafico i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 6px; }
+  .sube { color: var(--verde); } .baja { color: var(--rojo); }
   @media (max-width: 600px) {
     main { padding: 12px; }
     .indicador .valor { font-size: 19px; }
@@ -152,7 +170,7 @@
 
 <div class="barra-superior">
   <header>
-    <h1>🏪 Maxi Kiosco lo de Diego</h1>
+    <h1>🏪 Maxi Kiosco lo de Diego · Administración</h1>
     <span id="insigniaConexion" class="insignia">…</span>
     <input type="month" id="filtroMes" title="Mes a mostrar">
     <button class="boton-icono" id="botonRecargar" title="Volver a leer la planilla">⟳</button>
@@ -160,10 +178,14 @@
   </header>
   <nav id="pestanias">
     <button data-vista="resumen" class="activa">Resumen</button>
+    <button data-vista="ventas">Ventas</button>
+    <button data-vista="graficos">Gráficos</button>
     <button data-vista="caja">Cierre de caja</button>
+    <button data-vista="stock">Stock</button>
     <button data-vista="proveedores">Proveedores y deudas</button>
     <button data-vista="gastos">Gastos</button>
     <button data-vista="agenda">Agenda</button>
+    <button data-vista="accesos">Accesos</button>
   </nav>
 </div>
 
@@ -189,6 +211,121 @@
     </div>
   </section>
 
+  <!-- ═════════════ VENTAS ═════════════ -->
+  <section class="vista" id="vista-ventas">
+    <div class="tarjeta">
+      <div class="fila-filtros">
+        <label>Día
+          <select id="filtroDiaVentas"></select>
+        </label>
+        <label>Vendedor
+          <select id="filtroVendedor"><option value="">Todos</option></select>
+        </label>
+      </div>
+      <div class="indicadores" id="indicadoresVentas"></div>
+      <div class="tabla-contenedor" id="tablaVentas"></div>
+    </div>
+    <div class="tarjeta">
+      <h3>"Me retiro" del mes (gerente y empleado)</h3>
+      <div class="tabla-contenedor" id="tablaRetiros"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ GRÁFICOS ═════════════ -->
+  <section class="vista" id="vista-graficos">
+    <div class="tarjeta">
+      <div class="fila-filtros">
+        <label>Período
+          <select id="graficoPeriodo">
+            <option value="14">Últimos 14 días</option>
+            <option value="28">Últimos 28 días</option>
+            <option value="mes">Mes elegido arriba</option>
+          </select>
+        </label>
+        <label>Qué comparar
+          <select id="graficoMetrica">
+            <option value="total">Ventas totales</option>
+            <option value="efectivo">💵 Efectivo (sin puchos)</option>
+            <option value="mercadoPago">📱 Mercado Pago (sin puchos)</option>
+            <option value="puchos">🚬 Puchos</option>
+            <option value="cantidadVentas">Cantidad de ventas</option>
+          </select>
+        </label>
+      </div>
+      <div class="indicadores" id="indicadoresGrafico"></div>
+      <h3 id="tituloGrafico">Cada día vs. el mismo día de la semana anterior</h3>
+      <div class="leyenda">
+        <span><i style="background:#2a78d6"></i>Ese día</span>
+        <span><i style="background:#eb6834"></i>Mismo día, semana anterior</span>
+      </div>
+      <div class="grafico-contenedor" id="contenedorGrafico">
+        <div id="grafico"></div>
+        <div class="tooltip-grafico oculto" id="tooltipGrafico"></div>
+      </div>
+    </div>
+    <div class="tarjeta">
+      <h3>Detalle por día</h3>
+      <div class="tabla-contenedor" id="tablaGrafico"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ STOCK ═════════════ -->
+  <section class="vista" id="vista-stock">
+    <div class="grilla-2">
+      <div class="tarjeta">
+        <h2 id="tituloProducto">Agregar producto</h2>
+        <p class="nota" style="margin:-6px 0 12px">Los productos también se agregan solos cuando se venden por primera vez.</p>
+        <form id="formProducto" autocomplete="off">
+          <input type="hidden" name="id">
+          <div class="campos">
+            <label class="ancho">Producto <input type="text" name="nombre" required></label>
+            <label>Categoría <input type="text" name="categoria" list="listaCategorias" required style="text-transform:uppercase"></label>
+            <label>Precio <input type="number" name="precio" step="0.01" min="0" inputmode="decimal"></label>
+          </div>
+          <div class="acciones">
+            <button class="boton" type="submit">Guardar producto</button>
+            <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+          </div>
+        </form>
+      </div>
+      <div class="tarjeta">
+        <h2 id="tituloPalabra">Categorías automáticas</h2>
+        <p class="nota" style="margin:-6px 0 12px">Si el nombre de un producto nuevo empieza con alguna de estas palabras, se le pone esa categoría. Si no coincide ninguna: VARIOS.</p>
+        <form id="formPalabra" autocomplete="off">
+          <input type="hidden" name="id">
+          <div class="campos">
+            <label>Palabra <input type="text" name="palabra" required placeholder="Ej: philip"></label>
+            <label>Categoría <input type="text" name="categoria" list="listaCategorias" value="PUCHOS" required style="text-transform:uppercase"></label>
+          </div>
+          <div class="acciones">
+            <button class="boton" type="submit">Agregar palabra</button>
+            <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+          </div>
+        </form>
+        <div id="listaPalabras" style="margin-top:14px"></div>
+      </div>
+    </div>
+    <div class="tarjeta" style="margin-top:16px">
+      <div class="fila-filtros">
+        <label>Buscar <input type="search" id="buscarProducto" placeholder="Nombre del producto"></label>
+        <label>Categoría <select id="filtroCategoria"><option value="">Todas</option></select></label>
+      </div>
+      <div class="tabla-contenedor" id="tablaProductos"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ ACCESOS ═════════════ -->
+  <section class="vista" id="vista-accesos">
+    <div class="tarjeta">
+      <h2>Equipos autorizados para la caja</h2>
+      <p class="nota" style="margin:-6px 0 12px">
+        La página de caja (gerente y empleado) solo funciona en estos equipos. Para autorizar uno nuevo, abrí <b>caja.html</b>
+        en ese equipo y poné tu clave de administración. Si quitás un equipo, deja de funcionar al instante.
+      </p>
+      <div class="tabla-contenedor" id="tablaEquipos"></div>
+    </div>
+  </section>
+
   <!-- ═════════════ CAJA ═════════════ -->
   <section class="vista" id="vista-caja">
     <div class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f4c26b;background:#fffaf0">
@@ -211,9 +348,12 @@
         </div>
         <h3 style="margin-top:16px">Ventas del turno</h3>
         <div class="campos">
-          <label>Efectivo <input type="number" name="ventasEfectivo" step="0.01" min="0" inputmode="decimal"></label>
-          <label>Mercado Pago <input type="number" name="ventasMercadoPago" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Efectivo (sin puchos) <input type="number" name="ventasEfectivo" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Mercado Pago (sin puchos) <input type="number" name="ventasMercadoPago" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Puchos en efectivo <input type="number" name="ventasPuchosEfectivo" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Puchos por Mercado Pago <input type="number" name="ventasPuchosMercadoPago" step="0.01" min="0" inputmode="decimal"></label>
         </div>
+        <p class="nota">Los cierres del gerente toman estos valores solos de las ventas registradas. Acá se cargan solo cierres manuales.</p>
         <h3 style="margin-top:16px">Salidas de efectivo y recuento</h3>
         <div class="campos">
           <label>Pagos hechos desde la caja
@@ -397,6 +537,7 @@
 </main>
 
 <datalist id="listaProveedores"></datalist>
+<datalist id="listaCategorias"></datalist>
 
 <!-- Configuración -->
 <dialog id="dialogoConfig">
@@ -407,7 +548,7 @@
   <label>Clave de administración
     <input type="password" id="configClave" placeholder="CLAVE_ADMIN de Codigo.gs">
   </label>
-  <p class="nota">Si dejás la URL vacía, la app funciona en <b>modo prueba</b>: guarda los datos solo en este navegador.</p>
+  <p class="nota">Esto se guarda en este navegador. La administración funciona desde cualquier equipo con tu clave.</p>
   <div class="acciones">
     <button class="boton" id="botonGuardarConfig">Guardar y conectar</button>
     <button class="boton secundario" id="botonCerrarConfig">Cerrar</button>
@@ -420,13 +561,14 @@
 /* ══════════════════════════════════════════════════════════════
    ESTADO GENERAL
    ══════════════════════════════════════════════════════════════ */
-const TIPOS = ['cierres', 'deudas', 'pagos', 'gastos', 'proveedores'];
+const TIPOS = ['cierres', 'deudas', 'pagos', 'gastos', 'proveedores', 'productos', 'palabras', 'retiros', 'equipos'];
 let datos = datosVacios();
+let ventasMes = [];          // líneas de venta del mes elegido (se piden aparte porque son muchas)
 let configuracion = leerConfiguracion();
 let mesSeleccionado = fechaLocal().slice(0, 7);   // "aaaa-mm"
 
 function datosVacios() {
-  return { cierres: [], deudas: [], pagos: [], gastos: [], proveedores: [] };
+  return { cierres: [], deudas: [], pagos: [], gastos: [], proveedores: [], productos: [], palabras: [], retiros: [], equipos: [] };
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -442,10 +584,10 @@ function guardarConfiguracion(nueva) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   COMUNICACIÓN CON GOOGLE SHEETS (o modo prueba local)
+   COMUNICACIÓN CON GOOGLE SHEETS
    ══════════════════════════════════════════════════════════════ */
 async function llamarApi(accion, parametros = {}) {
-  if (!configuracion.url) return apiLocal(accion, parametros);
+  if (!configuracion.url) throw new Error('Falta configurar la conexión (botón ⚙︎)');
   // text/plain evita el "preflight" CORS, que Apps Script no responde
   const respuesta = await fetch(configuracion.url, {
     method: 'POST',
@@ -457,40 +599,13 @@ async function llamarApi(accion, parametros = {}) {
   return json.datos;
 }
 
-// Modo prueba: mismas operaciones, pero guardando en localStorage
-let baseLocal = null;
-function apiLocal(accion, p) {
-  if (!baseLocal) {
-    try { baseLocal = JSON.parse(localStorage.getItem('kiosco_datos')) || datosVacios(); }
-    catch (e) { baseLocal = datosVacios(); }
-    TIPOS.forEach(t => { if (!baseLocal[t]) baseLocal[t] = []; });
-  }
-  let resultado;
-  if (accion === 'listarTodo') {
-    resultado = baseLocal;
-  } else if (accion === 'crear') {
-    const registro = { ...p.datos, id: generarId(), registrado: fechaLocal() + ' ' + horaLocal() };
-    baseLocal[p.tipo].push(registro);
-    resultado = registro;
-  } else if (accion === 'actualizar') {
-    const i = baseLocal[p.tipo].findIndex(r => r.id === p.datos.id);
-    if (i < 0) throw new Error('No se encontró el registro');
-    baseLocal[p.tipo][i] = { ...baseLocal[p.tipo][i], ...p.datos };
-    resultado = baseLocal[p.tipo][i];
-  } else if (accion === 'eliminar') {
-    baseLocal[p.tipo] = baseLocal[p.tipo].filter(r => r.id !== p.id);
-    resultado = true;
-  }
-  try { localStorage.setItem('kiosco_datos', JSON.stringify(baseLocal)); } catch (e) {}
-  return Promise.resolve(JSON.parse(JSON.stringify(resultado)));
-}
-
 async function cargarTodo() {
   document.getElementById('cargando').classList.remove('oculto');
   try {
-    const recibido = await llamarApi('listarTodo');
+    const [recibido, ventas] = await Promise.all([llamarApi('listarTodo'), llamarApi('ventasDelMes', { mes: mesSeleccionado })]);
     datos = datosVacios();
     TIPOS.forEach(t => { datos[t] = recibido[t] || []; });
+    ventasMes = ventas || [];
   } catch (e) {
     mostrarAviso('No se pudo leer la planilla: ' + e.message, true);
   } finally {
@@ -499,6 +614,12 @@ async function cargarTodo() {
   actualizarInsignia();
   dibujarTodo();
   if (!document.getElementById('formCierre').elements.id.value) valoresPorDefectoCierre();
+}
+
+async function cargarVentasMes() {
+  try { ventasMes = await llamarApi('ventasDelMes', { mes: mesSeleccionado }); }
+  catch (e) { ventasMes = []; mostrarAviso('No se pudieron leer las ventas: ' + e.message, true); }
+  dibujarTodo();
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -574,7 +695,9 @@ const FORMULARIOS = {
   formDeuda:     { tipo: 'deudas',      titulo: 'tituloDeuda',     textoNuevo: 'Registrar deuda',      textoBoton: 'Guardar deuda',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
   formPago:      { tipo: 'pagos',       titulo: 'tituloPago',      textoNuevo: 'Registrar pago',       textoBoton: 'Guardar pago',      porDefecto: f => { f.elements.fecha.value = fechaLocal(); actualizarNotaSaldo(); } },
   formGasto:     { tipo: 'gastos',      titulo: 'tituloGasto',     textoNuevo: 'Registrar gasto',      textoBoton: 'Guardar gasto',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
-  formProveedor: { tipo: 'proveedores', titulo: 'tituloProveedor', textoNuevo: 'Agregar proveedor',    textoBoton: 'Guardar proveedor', porDefecto: () => {} }
+  formProveedor: { tipo: 'proveedores', titulo: 'tituloProveedor', textoNuevo: 'Agregar proveedor',    textoBoton: 'Guardar proveedor', porDefecto: () => {} },
+  formProducto:  { tipo: 'productos',   titulo: 'tituloProducto',  textoNuevo: 'Agregar producto',     textoBoton: 'Guardar producto',  porDefecto: () => {}, preparar: prepararProducto },
+  formPalabra:   { tipo: 'palabras',    titulo: 'tituloPalabra',   textoNuevo: 'Categorías automáticas', textoBoton: 'Agregar palabra', porDefecto: f => { f.elements.categoria.value = 'PUCHOS'; }, preparar: prepararPalabra }
 };
 
 function limpiarFormulario(idForm) {
@@ -594,7 +717,10 @@ async function guardarFormulario(evento) {
   const def = FORMULARIOS[form.id];
   const boton = form.querySelector('button[type=submit]');
   let registro = leerFormulario(form);
-  if (def.preparar) registro = def.preparar(registro);
+  if (def.preparar) {
+    try { registro = def.preparar(registro); }
+    catch (e) { mostrarAviso(e.message, true); return; }
+  }
 
   boton.disabled = true;
   try {
@@ -618,7 +744,9 @@ async function guardarFormulario(evento) {
 }
 
 async function eliminarRegistro(tipo, id) {
-  if (!confirm('¿Eliminar este registro? También se borra de la planilla.')) return;
+  const pregunta = tipo === 'equipos' ? '¿Quitarle el acceso a este equipo? La caja deja de funcionar ahí hasta que lo vuelvas a autorizar.'
+    : '¿Eliminar este registro? También se borra de la planilla.';
+  if (!confirm(pregunta)) return;
   try {
     await llamarApi('eliminar', { tipo, id });
     datos[tipo] = datos[tipo].filter(r => r.id !== id);
@@ -633,9 +761,9 @@ function editarRegistro(tipo, id) {
   const registro = datos[tipo].find(r => r.id === id);
   if (!registro) return;
   const idForm = Object.keys(FORMULARIOS).find(k => FORMULARIOS[k].tipo === tipo);
-  const vistaDelTipo = { cierres: 'caja', deudas: 'proveedores', pagos: 'proveedores', gastos: 'gastos', proveedores: 'agenda' }[tipo];
+  const vistaDelTipo = { cierres: 'caja', deudas: 'proveedores', pagos: 'proveedores', gastos: 'gastos', proveedores: 'agenda', productos: 'stock', palabras: 'stock' }[tipo];
   cambiarVista(vistaDelTipo);
-  const textos = { cierres: 'Editando cierre', deudas: 'Editando deuda', pagos: 'Editando pago', gastos: 'Editando gasto', proveedores: 'Editando proveedor' };
+  const textos = { cierres: 'Editando cierre', deudas: 'Editando deuda', pagos: 'Editando pago', gastos: 'Editando gasto', proveedores: 'Editando proveedor', productos: 'Editando producto', palabras: 'Editando palabra' };
   cargarEnFormulario(document.getElementById(idForm), registro, FORMULARIOS[idForm].titulo, textos[tipo]);
   if (tipo === 'cierres') calcularCierre();
   if (tipo === 'pagos') actualizarNotaSaldo();
@@ -663,16 +791,20 @@ function valoresPorDefectoCierre(form = document.getElementById('formCierre')) {
   calcularCierre();
 }
 
-// El negocio cobra solo en efectivo o Mercado Pago
+// El negocio cobra solo en efectivo o Mercado Pago; los puchos se llevan aparte
 function totalVendido(cierre) {
-  return num(cierre.ventasEfectivo) + num(cierre.ventasMercadoPago);
+  return num(cierre.ventasEfectivo) + num(cierre.ventasMercadoPago) + num(cierre.ventasPuchosEfectivo) + num(cierre.ventasPuchosMercadoPago);
+}
+function totalPuchos(cierre) {
+  return num(cierre.ventasPuchosEfectivo) + num(cierre.ventasPuchosMercadoPago);
 }
 
 function calcularCierre() {
   const f = document.getElementById('formCierre').elements;
   const v = nombre => num(f[nombre].value);
-  const totalVendido = v('ventasEfectivo') + v('ventasMercadoPago');
-  const esperado = v('fondoInicial') + v('ventasEfectivo') - v('pagosDesdeCaja') - v('retiros');
+  const totalVendido = v('ventasEfectivo') + v('ventasMercadoPago') + v('ventasPuchosEfectivo') + v('ventasPuchosMercadoPago');
+  // El efectivo de la caja incluye los puchos cobrados en efectivo
+  const esperado = v('fondoInicial') + v('ventasEfectivo') + v('ventasPuchosEfectivo') - v('pagosDesdeCaja') - v('retiros');
   document.getElementById('calcTotalVendido').textContent = pesos(totalVendido);
   document.getElementById('calcEsperado').textContent = pesos(esperado);
 
@@ -688,7 +820,7 @@ function calcularCierre() {
 }
 
 function prepararCierre(registro) {
-  registro.efectivoEsperado = redondear(registro.fondoInicial + registro.ventasEfectivo - registro.pagosDesdeCaja - registro.retiros);
+  registro.efectivoEsperado = redondear(registro.fondoInicial + registro.ventasEfectivo + registro.ventasPuchosEfectivo - registro.pagosDesdeCaja - registro.retiros);
   registro.diferencia = redondear(registro.efectivoContado - registro.efectivoEsperado);
   // Lo que carga o corrige la administración queda como revisado
   registro.estado = 'Revisado';
@@ -726,12 +858,13 @@ function dibujarSinRevisar() {
   document.getElementById('tarjetaSinRevisar').classList.toggle('oculto', !lista.length);
   if (!lista.length) return;
   document.getElementById('tablaSinRevisar').innerHTML = `<table>
-    <thead><tr><th>Fecha</th><th>Turno</th><th>Quién</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Detalle</th><th></th></tr></thead>
+    <thead><tr><th>Fecha</th><th>Turno</th><th>Quién</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Puchos</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Detalle</th><th></th></tr></thead>
     <tbody>${lista.map(c => {
       const dif = num(c.diferencia);
       return `<tr>
         <td>${fechaLinda(c.fecha)}</td><td>${escapar(c.turno)}</td><td>${escapar(c.responsable)}</td>
         <td class="num">${pesos(c.ventasEfectivo)}</td><td class="num">${pesos(c.ventasMercadoPago)}</td>
+        <td class="num">${pesos(totalPuchos(c))}</td>
         <td class="num">${pesos(c.efectivoContado)}</td>
         <td class="num ${dif < 0 ? 'negativo' : dif > 0 ? 'positivo' : ''}"><b>${dif > 0 ? '+' : ''}${pesos(dif)}</b></td>
         <td>${notasCierre(c)}</td>
@@ -767,6 +900,7 @@ function dibujarCierres() {
       <td class="num">${pesos(totalVendido(c))}</td>
       <td class="num">${pesos(c.ventasEfectivo)}</td>
       <td class="num">${pesos(c.ventasMercadoPago)}</td>
+      <td class="num">${pesos(totalPuchos(c))}</td>
       <td class="num">${pesos(c.efectivoContado)}</td>
       <td class="num ${dif < 0 ? 'negativo' : dif > 0 ? 'positivo' : ''}">${dif > 0 ? '+' : ''}${pesos(dif)}</td>
       <td>${etiquetaEstadoCierre(c)}</td>
@@ -777,10 +911,10 @@ function dibujarCierres() {
 
   const difMes = sumar(lista, 'diferencia');
   contenedor.innerHTML = `<table>
-    <thead><tr><th>Fecha</th><th>Turno</th><th>Responsable</th><th class="num">Vendido</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Estado</th><th>Detalle</th><th></th></tr></thead>
+    <thead><tr><th>Fecha</th><th>Turno</th><th>Responsable</th><th class="num">Vendido</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Puchos</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Estado</th><th>Detalle</th><th></th></tr></thead>
     <tbody>${filas}
       <tr class="total"><td colspan="3">Total del mes</td><td class="num">${pesos(lista.reduce((t, c) => t + totalVendido(c), 0))}</td>
-      <td class="num">${pesos(sumar(lista, 'ventasEfectivo'))}</td><td class="num">${pesos(sumar(lista, 'ventasMercadoPago'))}</td><td></td>
+      <td class="num">${pesos(sumar(lista, 'ventasEfectivo'))}</td><td class="num">${pesos(sumar(lista, 'ventasMercadoPago'))}</td><td class="num">${pesos(lista.reduce((t, c) => t + totalPuchos(c), 0))}</td><td></td>
       <td class="num ${difMes < 0 ? 'negativo' : ''}">${pesos(difMes)}</td><td colspan="3"></td></tr>
     </tbody></table>`;
 }
@@ -1018,7 +1152,12 @@ function dibujarAgenda() {
    ══════════════════════════════════════════════════════════════ */
 function dibujarResumen() {
   const cierresMes = datos.cierres.filter(c => delMes(c.fecha));
-  const ventasMes = cierresMes.reduce((t, c) => t + totalVendido(c), 0);
+  // Las ventas salen de lo registrado en caja; si en el mes no hay, de los cierres cargados a mano
+  const t = ventasMes.length ? totalizarVentas(ventasMes) : {
+    efectivo: sumar(cierresMes, 'ventasEfectivo'), mercadoPago: sumar(cierresMes, 'ventasMercadoPago'),
+    puchosEfectivo: sumar(cierresMes, 'ventasPuchosEfectivo'), puchosMercadoPago: sumar(cierresMes, 'ventasPuchosMercadoPago')
+  };
+  const totalVentasMes = t.efectivo + t.mercadoPago + t.puchosEfectivo + t.puchosMercadoPago;
   const sinRevisar = datos.cierres.filter(c => c.estado === 'Sin revisar').length;
   const diferenciasMes = sumar(cierresMes, 'diferencia');
   const pagadoMes = sumar(datos.pagos.filter(p => delMes(p.fecha)));
@@ -1032,12 +1171,15 @@ function dibujarResumen() {
 
   const nombreMes = new Date(mesSeleccionado + '-15').toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   document.getElementById('indicadoresResumen').innerHTML = `
-    ${sinRevisar ? `<div class="indicador" style="border-color:#f4c26b;background:#fffaf0;cursor:pointer" data-ir-caja><div class="etiqueta">Cierres sin revisar</div><div class="valor" style="color:var(--ambar)">${sinRevisar}</div><div class="detalle">Enviados por empleados · tocá para ver</div></div>` : ''}
-    <div class="indicador"><div class="etiqueta">Ventas del mes</div><div class="valor">${pesos(ventasMes)}</div><div class="detalle">Efectivo ${pesos(sumar(cierresMes, 'ventasEfectivo'))} · MP ${pesos(sumar(cierresMes, 'ventasMercadoPago'))}</div></div>
+    ${sinRevisar ? `<div class="indicador" style="border-color:#f4c26b;background:#fffaf0;cursor:pointer" data-ir-caja><div class="etiqueta">Cierres sin revisar</div><div class="valor" style="color:var(--ambar)">${sinRevisar}</div><div class="detalle">Enviados desde la caja · tocá para ver</div></div>` : ''}
+    <div class="indicador"><div class="etiqueta">💵 Efectivo</div><div class="valor">${pesos(t.efectivo)}</div><div class="detalle">Ventas del mes sin puchos</div></div>
+    <div class="indicador"><div class="etiqueta">📱 Mercado Pago</div><div class="valor">${pesos(t.mercadoPago)}</div><div class="detalle">Ventas del mes sin puchos</div></div>
+    <div class="indicador puchos"><div class="etiqueta">🚬 Puchos</div><div class="valor">${pesos(t.puchosEfectivo + t.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(t.puchosEfectivo)} · MP ${pesos(t.puchosMercadoPago)}</div></div>
+    <div class="indicador"><div class="etiqueta">Ventas totales del mes</div><div class="valor">${pesos(totalVentasMes)}</div><div class="detalle">${nombreMes}</div></div>
     <div class="indicador ${diferenciasMes < 0 ? 'alerta' : ''}"><div class="etiqueta">Diferencias de caja</div><div class="valor">${diferenciasMes > 0 ? '+' : ''}${pesos(diferenciasMes)}</div><div class="detalle">Sobrantes y faltantes del mes</div></div>
     <div class="indicador"><div class="etiqueta">Pagado a proveedores</div><div class="valor">${pesos(pagadoMes)}</div><div class="detalle">Contado + pagos de deuda</div></div>
     <div class="indicador"><div class="etiqueta">Gastos del mes</div><div class="valor">${pesos(gastosMes)}</div></div>
-    <div class="indicador"><div class="etiqueta">Ventas − pagos − gastos</div><div class="valor ${ventasMes - pagadoMes - gastosMes < 0 ? 'negativo' : ''}">${pesos(ventasMes - pagadoMes - gastosMes)}</div><div class="detalle">Flujo aproximado del mes</div></div>
+    <div class="indicador"><div class="etiqueta">Ventas − pagos − gastos</div><div class="valor ${totalVentasMes - pagadoMes - gastosMes < 0 ? 'negativo' : ''}">${pesos(totalVentasMes - pagadoMes - gastosMes)}</div><div class="detalle">Flujo aproximado del mes</div></div>
     <div class="indicador ${vencido > 0 ? 'alerta' : ''}"><div class="etiqueta">Deuda con proveedores</div><div class="valor">${pesos(deudaTotal)}</div><div class="detalle">${vencido > 0 ? pesos(vencido) + ' vencido' : 'Nada vencido'}</div></div>`;
 
   // Vencimientos: lo vencido y lo que vence en los próximos 7 días
@@ -1069,18 +1211,385 @@ function dibujarResumen() {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   VENTAS REGISTRADAS EN CAJA
+   ══════════════════════════════════════════════════════════════ */
+// Mismo criterio que el servidor: efectivo y MP sin puchos, y puchos aparte
+function totalizarVentas(lineas) {
+  const t = { efectivo: 0, mercadoPago: 0, puchosEfectivo: 0, puchosMercadoPago: 0, total: 0, tickets: new Set() };
+  lineas.forEach(v => {
+    const monto = num(v.subtotal);
+    const esPucho = v.categoria === 'PUCHOS';
+    const enEfectivo = v.medio === 'Efectivo';
+    if (esPucho) enEfectivo ? t.puchosEfectivo += monto : t.puchosMercadoPago += monto;
+    else enEfectivo ? t.efectivo += monto : t.mercadoPago += monto;
+    t.total += monto;
+    t.tickets.add(v.ticket);
+  });
+  t.cantidadVentas = t.tickets.size;
+  return t;
+}
+
+function etiquetaCategoria(cat) {
+  return `<span class="etiqueta-cat ${cat === 'PUCHOS' ? 'puchos' : ''}">${escapar(cat || '—')}</span>`;
+}
+
+// Agrupa las líneas por ticket: [{ ticket, fecha, hora, vendedor, rol, medio, items, monto }]
+function agruparTickets(lineas) {
+  const mapa = new Map();
+  lineas.forEach(v => {
+    if (!mapa.has(v.ticket)) mapa.set(v.ticket, { ticket: v.ticket, fecha: v.fecha, hora: v.hora, vendedor: v.vendedor, rol: v.rol, medio: v.medio, cierre: v.cierre, registrado: v.registrado, items: [], monto: 0 });
+    const t = mapa.get(v.ticket);
+    t.items.push(v);
+    t.monto += num(v.subtotal);
+  });
+  return [...mapa.values()].sort((a, b) => String(b.registrado).localeCompare(String(a.registrado)));
+}
+
+function dibujarFiltrosVentas() {
+  const selectDia = document.getElementById('filtroDiaVentas');
+  const diaElegido = selectDia.value;
+  const dias = [...new Set(ventasMes.map(v => v.fecha))].sort().reverse();
+  selectDia.innerHTML = '<option value="">Todo el mes</option>' + dias.map(d => `<option value="${d}">${fechaLinda(d)}</option>`).join('');
+  // Por defecto se muestra hoy si hay ventas; si no, el último día con ventas
+  if (dias.includes(diaElegido) || diaElegido === '') selectDia.value = diaElegido;
+  if (!selectDia.dataset.tocado) selectDia.value = dias.includes(fechaLocal()) ? fechaLocal() : (dias[0] || '');
+
+  const selectVendedor = document.getElementById('filtroVendedor');
+  const vendedorElegido = selectVendedor.value;
+  const vendedores = [...new Set(ventasMes.map(v => v.vendedor))].sort();
+  selectVendedor.innerHTML = '<option value="">Todos</option>' + vendedores.map(n => `<option>${escapar(n)}</option>`).join('');
+  if (vendedores.includes(vendedorElegido)) selectVendedor.value = vendedorElegido;
+}
+
+function dibujarVentas() {
+  dibujarFiltrosVentas();
+  const dia = document.getElementById('filtroDiaVentas').value;
+  const vendedor = document.getElementById('filtroVendedor').value;
+  const lineas = ventasMes.filter(v => (!dia || v.fecha === dia) && (!vendedor || v.vendedor === vendedor));
+  const t = totalizarVentas(lineas);
+
+  document.getElementById('indicadoresVentas').innerHTML = `
+    <div class="indicador"><div class="etiqueta">💵 Efectivo</div><div class="valor">${pesos(t.efectivo)}</div><div class="detalle">Sin puchos</div></div>
+    <div class="indicador"><div class="etiqueta">📱 Mercado Pago</div><div class="valor">${pesos(t.mercadoPago)}</div><div class="detalle">Sin puchos</div></div>
+    <div class="indicador puchos"><div class="etiqueta">🚬 Puchos</div><div class="valor">${pesos(t.puchosEfectivo + t.puchosMercadoPago)}</div><div class="detalle">Efvo ${pesos(t.puchosEfectivo)} · MP ${pesos(t.puchosMercadoPago)}</div></div>
+    <div class="indicador"><div class="etiqueta">Total</div><div class="valor">${pesos(t.total)}</div><div class="detalle">${t.cantidadVentas} ventas</div></div>`;
+
+  const tickets = agruparTickets(lineas);
+  const contenedor = document.getElementById('tablaVentas');
+  if (!tickets.length) { contenedor.innerHTML = '<p class="vacio">No hay ventas registradas para ese filtro.</p>'; return; }
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Hora</th><th>Vendedor</th><th>Productos</th><th>Medio</th><th class="num">Monto</th><th></th></tr></thead>
+    <tbody>${tickets.map(tk => `<tr>
+      <td>${fechaLinda(tk.fecha)}</td><td>${escapar(tk.hora)}</td>
+      <td>${escapar(tk.vendedor)}<br><small style="color:var(--suave)">${escapar(tk.rol)}</small></td>
+      <td>${tk.items.map(i => `${num(i.cantidad)} × ${escapar(i.producto)} ${etiquetaCategoria(i.categoria)} <small style="color:var(--suave)">${pesos(i.precio)}</small>`).join('<br>')}</td>
+      <td>${escapar(tk.medio)}</td>
+      <td class="num"><b>${pesos(tk.monto)}</b></td>
+      <td class="botones"><button class="boton peligro chico" data-anular="${escapar(tk.ticket)}" title="Anular venta">Anular</button></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// Solo administración puede anular: borra todas las líneas del ticket
+async function anularTicket(ticket) {
+  const lineas = ventasMes.filter(v => v.ticket === ticket);
+  if (!lineas.length) return;
+  const monto = lineas.reduce((t, v) => t + num(v.subtotal), 0);
+  if (!confirm(`¿Anular esta venta de ${pesos(monto)}? Se borra de la planilla.` + (lineas[0].cierre ? '\n\nOjo: ya está incluida en un cierre de caja enviado; ese cierre no se recalcula.' : ''))) return;
+  try {
+    for (const linea of lineas) await llamarApi('eliminar', { tipo: 'ventas', id: linea.id });
+    ventasMes = ventasMes.filter(v => v.ticket !== ticket);
+    dibujarTodo();
+    mostrarAviso('Venta anulada');
+  } catch (e) {
+    mostrarAviso('No se pudo anular: ' + e.message, true);
+    cargarVentasMes();
+  }
+}
+
+function dibujarRetiros() {
+  const lista = datos.retiros.filter(r => delMes(r.fecha)).sort(ordenarPorFecha).reverse();
+  const contenedor = document.getElementById('tablaRetiros');
+  if (!lista.length) { contenedor.innerHTML = '<p class="vacio">Sin retiros registrados en este mes.</p>'; return; }
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Hora</th><th>Quién</th><th class="num">Ventas</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Puchos</th><th class="num">Total vendido</th></tr></thead>
+    <tbody>${lista.map(r => `<tr>
+      <td>${fechaLinda(r.fecha)}</td><td>${escapar(r.hora)}</td><td>${escapar(r.empleado)}<br><small style="color:var(--suave)">${escapar(r.rol || 'Empleado')}</small></td>
+      <td class="num">${num(r.cantidadVentas)}</td><td class="num">${pesos(r.efectivo)}</td><td class="num">${pesos(r.mercadoPago)}</td>
+      <td class="num">${pesos(num(r.puchosEfectivo) + num(r.puchosMercadoPago))}</td><td class="num"><b>${pesos(r.totalVendido)}</b></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STOCK (catálogo de productos) Y CATEGORÍAS AUTOMÁTICAS
+   ══════════════════════════════════════════════════════════════ */
+function normalizarNombre(texto) {
+  return String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9&]+/g, ' ').trim();
+}
+
+function categoriasConocidas() {
+  return [...new Set(['PUCHOS', 'VARIOS', ...datos.productos.map(p => p.categoria), ...datos.palabras.map(p => p.categoria)].filter(Boolean))];
+}
+
+function prepararProducto(registro) {
+  registro.nombre = registro.nombre.replace(/\s+/g, ' ');
+  registro.categoria = registro.categoria.toUpperCase();
+  const repetido = datos.productos.find(p => p.id !== registro.id && normalizarNombre(p.nombre) === normalizarNombre(registro.nombre));
+  if (repetido) throw new Error(`Ya existe "${repetido.nombre}" en el stock`);
+  return registro;
+}
+
+function prepararPalabra(registro) {
+  registro.palabra = registro.palabra.toLowerCase();
+  registro.categoria = registro.categoria.toUpperCase();
+  return registro;
+}
+
+function dibujarStock() {
+  document.getElementById('listaCategorias').innerHTML = categoriasConocidas().map(c => `<option value="${escapar(c)}">`).join('');
+  const selectCat = document.getElementById('filtroCategoria');
+  const catElegida = selectCat.value;
+  selectCat.innerHTML = '<option value="">Todas</option>' + categoriasConocidas().map(c => `<option>${escapar(c)}</option>`).join('');
+  selectCat.value = catElegida;
+
+  // Unidades vendidas en el mes por producto
+  const vendidos = {};
+  ventasMes.forEach(v => { const k = normalizarNombre(v.producto); vendidos[k] = (vendidos[k] || 0) + num(v.cantidad); });
+
+  const busqueda = normalizarNombre(document.getElementById('buscarProducto').value);
+  const lista = datos.productos
+    .filter(p => (!busqueda || normalizarNombre(p.nombre).includes(busqueda)) && (!catElegida || p.categoria === catElegida))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  const contenedor = document.getElementById('tablaProductos');
+  if (!datos.productos.length) { contenedor.innerHTML = '<p class="vacio">Todavía no hay productos. Se van a ir agregando solos a medida que se registren ventas.</p>'; return; }
+  contenedor.innerHTML = `<p class="nota">${lista.length} de ${datos.productos.length} productos</p><table>
+    <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Precio</th><th class="num">Vendidos en el mes</th><th>Alta</th><th></th></tr></thead>
+    <tbody>${lista.map(p => `<tr>
+      <td><b>${escapar(p.nombre)}</b></td><td>${etiquetaCategoria(p.categoria)}</td>
+      <td class="num">${pesos(p.precio)}</td><td class="num">${vendidos[normalizarNombre(p.nombre)] || '—'}</td>
+      <td>${fechaLinda(p.registrado)}</td>${botonesFila('productos', p.id)}</tr>`).join('')}</tbody></table>`;
+}
+
+function dibujarPalabras() {
+  const porCategoria = {};
+  datos.palabras.forEach(p => { (porCategoria[p.categoria] = porCategoria[p.categoria] || []).push(p); });
+  const contenedor = document.getElementById('listaPalabras');
+  const categorias = Object.keys(porCategoria).sort();
+  contenedor.innerHTML = categorias.length ? categorias.map(cat => `
+    <div style="margin-bottom:10px">${etiquetaCategoria(cat)}
+      <div class="chips" style="margin-top:6px">${porCategoria[cat].sort((a, b) => a.palabra.localeCompare(b.palabra)).map(p =>
+        `<span class="chip">${escapar(p.palabra)} <button data-eliminar="palabras" data-id="${p.id}" title="Quitar">✕</button></span>`).join('')}</div>
+    </div>`).join('') : '<p class="vacio">Sin palabras clave.</p>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACCESOS (equipos autorizados para caja.html)
+   ══════════════════════════════════════════════════════════════ */
+function dibujarAccesos() {
+  const contenedor = document.getElementById('tablaEquipos');
+  if (!datos.equipos.length) { contenedor.innerHTML = '<p class="vacio">Ningún equipo autorizado todavía.</p>'; return; }
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Equipo</th><th>Autorizado el</th><th></th></tr></thead>
+    <tbody>${datos.equipos.map(e => `<tr><td><b>${escapar(e.nombre)}</b></td><td>${escapar(e.registrado)}</td>
+      <td class="botones"><button class="boton peligro chico" data-eliminar="equipos" data-id="${e.id}">Quitar acceso</button></td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GRÁFICOS: cada día vs. el mismo día de la semana anterior
+   ══════════════════════════════════════════════════════════════ */
+const COLOR_ACTUAL = '#2a78d6';     // azul: ese día
+const COLOR_ANTERIOR = '#eb6834';   // naranja: mismo día de la semana anterior
+const NOMBRES_DIA = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+let datosGrafico = null;   // { dias: [fechas del período], porFecha: Map(fecha → totales) }
+
+function diaSemana(fecha) {
+  const [a, m, d] = fecha.split('-').map(Number);
+  return new Date(a, m - 1, d).getDay();
+}
+
+function rangoGrafico() {
+  const periodo = document.getElementById('graficoPeriodo').value;
+  const hoy = fechaLocal();
+  if (periodo === 'mes') {
+    const [a, m] = mesSeleccionado.split('-').map(Number);
+    const ultimo = fechaLocal(new Date(a, m, 0));
+    return { desde: mesSeleccionado + '-01', hasta: ultimo < hoy ? ultimo : hoy };
+  }
+  return { desde: sumarDias(hoy, -(Number(periodo) - 1)), hasta: hoy };
+}
+
+async function cargarGraficos() {
+  const { desde, hasta } = rangoGrafico();
+  const contenedor = document.getElementById('grafico');
+  if (desde > hasta) { datosGrafico = null; contenedor.innerHTML = '<p class="vacio">Ese mes todavía no empezó.</p>'; return; }
+  contenedor.innerHTML = '<p class="vacio">Cargando…</p>';
+  try {
+    // Se piden 7 días más atrás para tener la semana anterior del primer día
+    const dias = await llamarApi('ventasPorDia', { desde: sumarDias(desde, -7), hasta });
+    const fechas = [];
+    for (let f = desde; f <= hasta; f = sumarDias(f, 1)) fechas.push(f);
+    datosGrafico = { dias: fechas, porFecha: new Map(dias.map(d => [d.fecha, d])) };
+    dibujarGrafico();
+  } catch (e) {
+    contenedor.innerHTML = `<p class="vacio">No se pudieron cargar los datos (${escapar(e.message)}).</p>`;
+  }
+}
+
+function valorMetrica(totales, metrica) {
+  if (!totales) return 0;
+  if (metrica === 'puchos') return num(totales.puchosEfectivo) + num(totales.puchosMercadoPago);
+  return num(totales[metrica]);
+}
+
+function formatoMetrica(valor, metrica) {
+  return metrica === 'cantidadVentas' ? String(Math.round(valor)) : pesos(valor);
+}
+
+function variacion(actual, anterior) {
+  if (!anterior) return null;
+  return (actual - anterior) / anterior * 100;
+}
+
+function textoVariacion(v) {
+  if (v === null) return '<span style="color:var(--suave)">—</span>';
+  const signo = v > 0 ? '▲ +' : v < 0 ? '▼ ' : '';
+  return `<span class="${v > 0 ? 'sube' : v < 0 ? 'baja' : ''}">${signo}${v.toFixed(1).replace('.', ',')}%</span>`;
+}
+
+// Escala "redonda" para el eje Y: paso de 1, 2, 2,5 o 5 (× potencia de 10) con 3 a 5 líneas
+function escalaRedonda(maximo) {
+  if (maximo <= 0) return { maximo: 4, pasos: 4 };
+  const potencia = Math.pow(10, Math.floor(Math.log10(maximo)));
+  for (const p of [0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10]) {
+    const paso = p * potencia;
+    const pasos = Math.ceil(maximo / paso);
+    if (pasos <= 5) return { maximo: paso * Math.max(pasos, 3), pasos: Math.max(pasos, 3) };
+  }
+  return { maximo: 10 * potencia, pasos: 5 };
+}
+
+function formatoEje(valor, metrica) {
+  if (metrica === 'cantidadVentas') return String(Math.round(valor));
+  if (valor >= 1e6) return '$' + (valor / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + 'M';
+  if (valor >= 1e3) return '$' + (valor / 1e3).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + 'k';
+  return '$' + valor;
+}
+
+// Barra con las puntas de arriba redondeadas (4px) y la base recta sobre el eje
+function caminoBarra(x, y, ancho, alto) {
+  if (alto <= 0) return '';
+  const r = Math.min(4, ancho / 2, alto);
+  return `M${x},${y + alto} V${y + r} Q${x},${y} ${x + r},${y} H${x + ancho - r} Q${x + ancho},${y} ${x + ancho},${y + r} V${y + alto} Z`;
+}
+
+function dibujarGrafico() {
+  if (!datosGrafico) return;
+  const metrica = document.getElementById('graficoMetrica').value;
+  const nombreMetrica = document.getElementById('graficoMetrica').selectedOptions[0].textContent;
+  const filas = datosGrafico.dias.map(fecha => {
+    const anteriorFecha = sumarDias(fecha, -7);
+    const actual = valorMetrica(datosGrafico.porFecha.get(fecha), metrica);
+    const anterior = valorMetrica(datosGrafico.porFecha.get(anteriorFecha), metrica);
+    return { fecha, anteriorFecha, actual, anterior, variacion: variacion(actual, anterior) };
+  });
+
+  // ── Indicadores: últimos 7 días del período vs. los 7 anteriores ──
+  const ultimos7 = filas.slice(-7);
+  const sumaActual = ultimos7.reduce((t, f) => t + f.actual, 0);
+  const sumaAnterior = ultimos7.reduce((t, f) => t + f.anterior, 0);
+  const mejor = filas.reduce((m, f) => (f.actual > (m ? m.actual : -1) ? f : m), null);
+  document.getElementById('indicadoresGrafico').innerHTML = `
+    <div class="indicador"><div class="etiqueta">Últimos 7 días</div><div class="valor">${formatoMetrica(sumaActual, metrica)}</div>
+      <div class="detalle">${fechaLinda(ultimos7[0].fecha)} al ${fechaLinda(ultimos7[ultimos7.length - 1].fecha)}</div></div>
+    <div class="indicador"><div class="etiqueta">Los 7 días anteriores</div><div class="valor">${formatoMetrica(sumaAnterior, metrica)}</div>
+      <div class="detalle">${fechaLinda(ultimos7[0].anteriorFecha)} al ${fechaLinda(ultimos7[ultimos7.length - 1].anteriorFecha)}</div></div>
+    <div class="indicador"><div class="etiqueta">Variación semanal</div><div class="valor">${textoVariacion(variacion(sumaActual, sumaAnterior))}</div></div>
+    <div class="indicador"><div class="etiqueta">Mejor día del período</div><div class="valor">${mejor && mejor.actual ? formatoMetrica(mejor.actual, metrica) : '—'}</div>
+      <div class="detalle">${mejor && mejor.actual ? NOMBRES_DIA[diaSemana(mejor.fecha)] + ' ' + fechaLinda(mejor.fecha) : ''}</div></div>`;
+  document.getElementById('tituloGrafico').textContent = `${nombreMetrica}: cada día vs. el mismo día de la semana anterior`;
+
+  // ── Gráfico de barras agrupadas (SVG) ──
+  const contenedor = document.getElementById('contenedorGrafico');
+  const ancho = Math.max(contenedor.clientWidth || 900, 560);
+  const alto = 300;
+  const margen = { arriba: 12, derecha: 8, abajo: 40, izquierda: 56 };
+  const anchoUtil = ancho - margen.izquierda - margen.derecha;
+  const altoUtil = alto - margen.arriba - margen.abajo;
+  const { maximo, pasos } = escalaRedonda(Math.max(...filas.map(f => Math.max(f.actual, f.anterior)), 0));
+  const y = v => margen.arriba + altoUtil - (v / maximo) * altoUtil;
+  const anchoGrupo = anchoUtil / filas.length;
+  const anchoBarra = Math.max(3, Math.min(18, (anchoGrupo - 8) / 2));
+  const cadaCuanto = filas.length > 21 ? 3 : filas.length > 14 ? 2 : 1;   // etiquetas del eje X sin pisarse
+
+  let svg = `<svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="${escapar(nombreMetrica)} por día comparado con la semana anterior">`;
+  for (let i = 0; i <= pasos; i++) {
+    const valor = maximo / pasos * i;
+    const yy = y(valor);
+    svg += `<line x1="${margen.izquierda}" x2="${ancho - margen.derecha}" y1="${yy}" y2="${yy}" stroke="${i === 0 ? '#c9c5ba' : '#ece9e2'}" stroke-width="1"/>`;
+    svg += `<text x="${margen.izquierda - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="#6b7280">${formatoEje(valor, metrica)}</text>`;
+  }
+  filas.forEach((f, i) => {
+    const centro = margen.izquierda + anchoGrupo * i + anchoGrupo / 2;
+    const xActual = centro - anchoBarra - 1;     // 2px de separación entre las dos barras
+    const xAnterior = centro + 1;
+    svg += `<path d="${caminoBarra(xActual, y(f.actual), anchoBarra, y(0) - y(f.actual))}" fill="${COLOR_ACTUAL}"/>`;
+    svg += `<path d="${caminoBarra(xAnterior, y(f.anterior), anchoBarra, y(0) - y(f.anterior))}" fill="${COLOR_ANTERIOR}"/>`;
+    if (i % cadaCuanto === 0 || i === filas.length - 1) {
+      const esHoy = f.fecha === fechaLocal();
+      svg += `<text x="${centro}" y="${alto - margen.abajo + 16}" text-anchor="middle" font-size="11" fill="${esHoy ? '#1d2125' : '#6b7280'}" font-weight="${esHoy ? 700 : 400}">${NOMBRES_DIA[diaSemana(f.fecha)]}</text>`;
+      svg += `<text x="${centro}" y="${alto - margen.abajo + 30}" text-anchor="middle" font-size="11" fill="#6b7280">${fechaLinda(f.fecha).slice(0, 5)}</text>`;
+    }
+    // Zona invisible (todo el alto del día) para el tooltip: más fácil de apuntar que la barra
+    svg += `<rect x="${margen.izquierda + anchoGrupo * i}" y="${margen.arriba}" width="${anchoGrupo}" height="${altoUtil}" fill="transparent" data-dia="${i}" style="cursor:crosshair"/>`;
+  });
+  svg += '</svg>';
+  document.getElementById('grafico').innerHTML = svg;
+
+  // ── Tooltip ──
+  const tooltip = document.getElementById('tooltipGrafico');
+  tooltip.classList.add('oculto');
+  const svgElemento = document.querySelector('#grafico svg');
+  svgElemento.onpointermove = e => {
+    const zona = e.target.closest('[data-dia]');
+    if (!zona) { tooltip.classList.add('oculto'); return; }
+    const f = filas[Number(zona.dataset.dia)];
+    tooltip.innerHTML = `
+      <div style="margin-bottom:6px"><b>${NOMBRES_DIA[diaSemana(f.fecha)]} ${fechaLinda(f.fecha)}</b></div>
+      <div class="fila"><span><i style="background:${COLOR_ACTUAL}"></i>Ese día</span><b>${formatoMetrica(f.actual, metrica)}</b></div>
+      <div class="fila"><span><i style="background:${COLOR_ANTERIOR}"></i>${NOMBRES_DIA[diaSemana(f.anteriorFecha)]} ${fechaLinda(f.anteriorFecha).slice(0, 5)}</span><b>${formatoMetrica(f.anterior, metrica)}</b></div>
+      <div class="fila" style="margin-top:4px;border-top:1px solid var(--borde);padding-top:4px"><span>Variación</span><b>${textoVariacion(f.variacion)}</b></div>`;
+    const caja = contenedor.getBoundingClientRect();
+    const izquierda = e.clientX - caja.left + 14;
+    tooltip.style.left = Math.min(izquierda, caja.width - 230) + 'px';
+    tooltip.style.top = Math.max(0, e.clientY - caja.top - 40) + 'px';
+    tooltip.classList.remove('oculto');
+  };
+  svgElemento.onpointerleave = () => tooltip.classList.add('oculto');
+
+  // ── Tabla (los mismos datos, para leer exacto) ──
+  document.getElementById('tablaGrafico').innerHTML = `<table>
+    <thead><tr><th>Día</th><th class="num">Ese día</th><th>Semana anterior</th><th class="num">Monto anterior</th><th class="num">Variación</th></tr></thead>
+    <tbody>${filas.slice().reverse().map(f => `<tr>
+      <td><b>${NOMBRES_DIA[diaSemana(f.fecha)]}</b> ${fechaLinda(f.fecha)}</td>
+      <td class="num">${formatoMetrica(f.actual, metrica)}</td>
+      <td>${NOMBRES_DIA[diaSemana(f.anteriorFecha)]} ${fechaLinda(f.anteriorFecha)}</td>
+      <td class="num">${formatoMetrica(f.anterior, metrica)}</td>
+      <td class="num">${textoVariacion(f.variacion)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
    NAVEGACIÓN Y DIBUJO GENERAL
    ══════════════════════════════════════════════════════════════ */
 function cambiarVista(nombre) {
   document.querySelectorAll('.vista').forEach(v => v.classList.toggle('activa', v.id === 'vista-' + nombre));
   document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
   try { localStorage.setItem('kiosco_vista', nombre); } catch (e) {}
+  if (nombre === 'graficos' && configuracion.url) cargarGraficos();
 }
 
 function actualizarInsignia() {
   const insignia = document.getElementById('insigniaConexion');
   if (configuracion.url) { insignia.textContent = '● Google Sheets'; insignia.className = 'insignia'; }
-  else { insignia.textContent = 'Modo prueba (sin planilla)'; insignia.className = 'insignia local'; }
+  else { insignia.textContent = 'Sin conectar'; insignia.className = 'insignia local'; }
 }
 
 function dibujarTodo() {
@@ -1093,6 +1602,11 @@ function dibujarTodo() {
   dibujarMovimientosMes();
   dibujarGastos();
   dibujarAgenda();
+  dibujarVentas();
+  dibujarRetiros();
+  dibujarStock();
+  dibujarPalabras();
+  dibujarAccesos();
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1101,7 +1615,20 @@ function dibujarTodo() {
 function iniciar() {
   const filtroMes = document.getElementById('filtroMes');
   filtroMes.value = mesSeleccionado;
-  filtroMes.addEventListener('change', () => { mesSeleccionado = filtroMes.value || fechaLocal().slice(0, 7); dibujarTodo(); });
+  filtroMes.addEventListener('change', () => {
+    mesSeleccionado = filtroMes.value || fechaLocal().slice(0, 7);
+    delete document.getElementById('filtroDiaVentas').dataset.tocado;
+    cargarVentasMes();   // las ventas se piden por mes
+    if (document.getElementById('graficoPeriodo').value === 'mes' && document.getElementById('vista-graficos').classList.contains('activa')) cargarGraficos();
+  });
+  const filtroDia = document.getElementById('filtroDiaVentas');
+  filtroDia.addEventListener('change', () => { filtroDia.dataset.tocado = '1'; dibujarVentas(); });
+  document.getElementById('filtroVendedor').addEventListener('change', dibujarVentas);
+  document.getElementById('buscarProducto').addEventListener('input', dibujarStock);
+  document.getElementById('graficoPeriodo').addEventListener('change', cargarGraficos);
+  document.getElementById('graficoMetrica').addEventListener('change', dibujarGrafico);
+  window.addEventListener('resize', () => { if (datosGrafico) dibujarGrafico(); });
+  document.getElementById('filtroCategoria').addEventListener('change', dibujarStock);
 
   document.getElementById('pestanias').addEventListener('click', e => {
     if (e.target.dataset.vista) cambiarVista(e.target.dataset.vista);
@@ -1128,6 +1655,7 @@ function iniciar() {
     const b = e.target.closest('button');
     if (!b) return;
     if (b.dataset.revisar) marcarRevisado(b.dataset.revisar);
+    else if (b.dataset.anular) anularTicket(b.dataset.anular);
     else if (b.dataset.editar) editarRegistro(b.dataset.editar, b.dataset.id);
     else if (b.dataset.eliminar) eliminarRegistro(b.dataset.eliminar, b.dataset.id);
     else if (b.dataset.pagar !== undefined) { cambiarVista('proveedores'); prepararPago(b.dataset.pagar); }
@@ -1158,7 +1686,8 @@ function iniciar() {
   });
   document.getElementById('botonRecargar').addEventListener('click', cargarTodo);
 
-  cargarTodo();
+  if (configuracion.url) cargarTodo();
+  else { document.getElementById('cargando').classList.add('oculto'); actualizarInsignia(); dibujarTodo(); dialogo.showModal(); }
 }
 
 iniciar();
