@@ -191,6 +191,10 @@
 
   <!-- ═════════════ CAJA ═════════════ -->
   <section class="vista" id="vista-caja">
+    <div class="tarjeta oculto" id="tarjetaSinRevisar" style="border-color:#f4c26b;background:#fffaf0">
+      <h2>Cierres enviados por empleados sin revisar</h2>
+      <div class="tabla-contenedor" id="tablaSinRevisar"></div>
+    </div>
     <div class="tarjeta">
       <h2 id="tituloCierre">Nuevo cierre de caja</h2>
       <form id="formCierre" autocomplete="off">
@@ -208,8 +212,7 @@
         <h3 style="margin-top:16px">Ventas del turno</h3>
         <div class="campos">
           <label>Efectivo <input type="number" name="ventasEfectivo" step="0.01" min="0" inputmode="decimal"></label>
-          <label>Tarjeta (débito/crédito) <input type="number" name="ventasTarjeta" step="0.01" min="0" inputmode="decimal"></label>
-          <label>Transferencia / QR <input type="number" name="ventasTransferencia" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Mercado Pago <input type="number" name="ventasMercadoPago" step="0.01" min="0" inputmode="decimal"></label>
         </div>
         <h3 style="margin-top:16px">Salidas de efectivo y recuento</h3>
         <div class="campos">
@@ -217,6 +220,7 @@
             <input type="number" name="pagosDesdeCaja" step="0.01" min="0" inputmode="decimal">
             <button type="button" class="enlace" id="botonTraerPagos">Traer lo registrado en esa fecha</button>
           </label>
+          <label>¿Qué se pagó con la caja? <input type="text" name="detallePagosCaja" placeholder="Ej: Coca $15.000, sodero $4.000"></label>
           <label>Retiros (dueño, depósitos) <input type="number" name="retiros" step="0.01" min="0" inputmode="decimal"></label>
           <label>Efectivo contado <input type="number" name="efectivoContado" step="0.01" min="0" inputmode="decimal" required></label>
           <label>Fondo que queda para el próximo turno <input type="number" name="fondoSiguiente" step="0.01" min="0" inputmode="decimal"></label>
@@ -286,9 +290,8 @@
               <select name="medio">
                 <option>Efectivo de caja</option>
                 <option>Efectivo (fuera de caja)</option>
-                <option>Transferencia / Mercado Pago</option>
-                <option>Tarjeta</option>
-                <option>Cheque</option>
+                <option>Mercado Pago</option>
+                <option>Otro</option>
               </select>
             </label>
             <label>Comprobante <input type="text" name="comprobante" placeholder="Opcional"></label>
@@ -348,9 +351,9 @@
             <select name="medio">
               <option>Efectivo de caja</option>
               <option>Efectivo (fuera de caja)</option>
-              <option>Transferencia / Mercado Pago</option>
-              <option>Tarjeta</option>
+              <option>Mercado Pago</option>
               <option>Débito automático</option>
+              <option>Otro</option>
             </select>
           </label>
           <label class="ancho">Notas <textarea name="notas" rows="2"></textarea></label>
@@ -401,8 +404,8 @@
   <label>URL de la aplicación web (Apps Script)
     <input type="url" id="configUrl" placeholder="https://script.google.com/macros/s/…/exec">
   </label>
-  <label>Clave de acceso
-    <input type="password" id="configClave" placeholder="La misma que pusiste en Codigo.gs">
+  <label>Clave de administración
+    <input type="password" id="configClave" placeholder="CLAVE_ADMIN de Codigo.gs">
   </label>
   <p class="nota">Si dejás la URL vacía, la app funciona en <b>modo prueba</b>: guarda los datos solo en este navegador.</p>
   <div class="acciones">
@@ -660,10 +663,15 @@ function valoresPorDefectoCierre(form = document.getElementById('formCierre')) {
   calcularCierre();
 }
 
+// El negocio cobra solo en efectivo o Mercado Pago
+function totalVendido(cierre) {
+  return num(cierre.ventasEfectivo) + num(cierre.ventasMercadoPago);
+}
+
 function calcularCierre() {
   const f = document.getElementById('formCierre').elements;
   const v = nombre => num(f[nombre].value);
-  const totalVendido = v('ventasEfectivo') + v('ventasTarjeta') + v('ventasTransferencia');
+  const totalVendido = v('ventasEfectivo') + v('ventasMercadoPago');
   const esperado = v('fondoInicial') + v('ventasEfectivo') - v('pagosDesdeCaja') - v('retiros');
   document.getElementById('calcTotalVendido').textContent = pesos(totalVendido);
   document.getElementById('calcEsperado').textContent = pesos(esperado);
@@ -682,7 +690,56 @@ function calcularCierre() {
 function prepararCierre(registro) {
   registro.efectivoEsperado = redondear(registro.fondoInicial + registro.ventasEfectivo - registro.pagosDesdeCaja - registro.retiros);
   registro.diferencia = redondear(registro.efectivoContado - registro.efectivoEsperado);
+  // Lo que carga o corrige la administración queda como revisado
+  registro.estado = 'Revisado';
+  if (!registro.id) registro.origen = 'Administración';
   return registro;
+}
+
+async function marcarRevisado(id) {
+  try {
+    const actualizado = await llamarApi('actualizar', { tipo: 'cierres', datos: { id, estado: 'Revisado' } });
+    datos.cierres = datos.cierres.map(c => c.id === id ? actualizado : c);
+    dibujarTodo();
+    mostrarAviso('Cierre marcado como revisado');
+  } catch (e) {
+    mostrarAviso('No se pudo actualizar: ' + e.message, true);
+  }
+}
+
+function etiquetaEstadoCierre(c) {
+  if (c.estado === 'Sin revisar') return '<span class="etiqueta-estado e-proxima">Sin revisar</span>';
+  return '<span class="etiqueta-estado e-ok">Revisado</span>';
+}
+
+// Detalle de un cierre en una celda: observaciones + qué se pagó con la caja
+function notasCierre(c) {
+  const partes = [];
+  if (num(c.pagosDesdeCaja)) partes.push(`Pagos de caja ${pesos(c.pagosDesdeCaja)}${c.detallePagosCaja ? ': ' + escapar(c.detallePagosCaja) : ''}`);
+  if (num(c.retiros)) partes.push(`Retiros ${pesos(c.retiros)}`);
+  if (c.observaciones) partes.push(escapar(c.observaciones));
+  return partes.join('<br>');
+}
+
+function dibujarSinRevisar() {
+  const lista = datos.cierres.filter(c => c.estado === 'Sin revisar').sort(ordenarPorFecha);
+  document.getElementById('tarjetaSinRevisar').classList.toggle('oculto', !lista.length);
+  if (!lista.length) return;
+  document.getElementById('tablaSinRevisar').innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Turno</th><th>Quién</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Detalle</th><th></th></tr></thead>
+    <tbody>${lista.map(c => {
+      const dif = num(c.diferencia);
+      return `<tr>
+        <td>${fechaLinda(c.fecha)}</td><td>${escapar(c.turno)}</td><td>${escapar(c.responsable)}</td>
+        <td class="num">${pesos(c.ventasEfectivo)}</td><td class="num">${pesos(c.ventasMercadoPago)}</td>
+        <td class="num">${pesos(c.efectivoContado)}</td>
+        <td class="num ${dif < 0 ? 'negativo' : dif > 0 ? 'positivo' : ''}"><b>${dif > 0 ? '+' : ''}${pesos(dif)}</b></td>
+        <td>${notasCierre(c)}</td>
+        <td class="botones">
+          <button class="boton chico" data-revisar="${c.id}">✓ Revisado</button>
+          <button class="boton secundario chico" data-editar="cierres" data-id="${c.id}">Corregir</button>
+        </td></tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 // Suma los pagos a proveedores y gastos de esa fecha que salieron del efectivo de la caja
@@ -702,28 +759,29 @@ function dibujarCierres() {
   if (!lista.length) { contenedor.innerHTML = '<p class="vacio">No hay cierres cargados en este mes.</p>'; return; }
 
   const filas = lista.map(c => {
-    const total = num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia);
     const dif = num(c.diferencia);
     return `<tr>
       <td>${fechaLinda(c.fecha)}</td>
       <td>${escapar(c.turno)}</td>
       <td>${escapar(c.responsable)}</td>
-      <td class="num">${pesos(total)}</td>
+      <td class="num">${pesos(totalVendido(c))}</td>
       <td class="num">${pesos(c.ventasEfectivo)}</td>
+      <td class="num">${pesos(c.ventasMercadoPago)}</td>
       <td class="num">${pesos(c.efectivoContado)}</td>
       <td class="num ${dif < 0 ? 'negativo' : dif > 0 ? 'positivo' : ''}">${dif > 0 ? '+' : ''}${pesos(dif)}</td>
-      <td>${escapar(c.observaciones)}</td>
+      <td>${etiquetaEstadoCierre(c)}</td>
+      <td>${notasCierre(c)}</td>
       ${botonesFila('cierres', c.id)}
     </tr>`;
   }).join('');
 
-  const totalMes = lista.reduce((t, c) => t + num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia), 0);
   const difMes = sumar(lista, 'diferencia');
   contenedor.innerHTML = `<table>
-    <thead><tr><th>Fecha</th><th>Turno</th><th>Responsable</th><th class="num">Vendido</th><th class="num">Efectivo</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Obs.</th><th></th></tr></thead>
+    <thead><tr><th>Fecha</th><th>Turno</th><th>Responsable</th><th class="num">Vendido</th><th class="num">Efectivo</th><th class="num">Mercado Pago</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Estado</th><th>Detalle</th><th></th></tr></thead>
     <tbody>${filas}
-      <tr class="total"><td colspan="3">Total del mes</td><td class="num">${pesos(totalMes)}</td><td></td><td></td>
-      <td class="num ${difMes < 0 ? 'negativo' : ''}">${pesos(difMes)}</td><td colspan="2"></td></tr>
+      <tr class="total"><td colspan="3">Total del mes</td><td class="num">${pesos(lista.reduce((t, c) => t + totalVendido(c), 0))}</td>
+      <td class="num">${pesos(sumar(lista, 'ventasEfectivo'))}</td><td class="num">${pesos(sumar(lista, 'ventasMercadoPago'))}</td><td></td>
+      <td class="num ${difMes < 0 ? 'negativo' : ''}">${pesos(difMes)}</td><td colspan="3"></td></tr>
     </tbody></table>`;
 }
 
@@ -960,7 +1018,8 @@ function dibujarAgenda() {
    ══════════════════════════════════════════════════════════════ */
 function dibujarResumen() {
   const cierresMes = datos.cierres.filter(c => delMes(c.fecha));
-  const ventasMes = cierresMes.reduce((t, c) => t + num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia), 0);
+  const ventasMes = cierresMes.reduce((t, c) => t + totalVendido(c), 0);
+  const sinRevisar = datos.cierres.filter(c => c.estado === 'Sin revisar').length;
   const diferenciasMes = sumar(cierresMes, 'diferencia');
   const pagadoMes = sumar(datos.pagos.filter(p => delMes(p.fecha)));
   const gastosMes = sumar(datos.gastos.filter(g => delMes(g.fecha)));
@@ -973,7 +1032,8 @@ function dibujarResumen() {
 
   const nombreMes = new Date(mesSeleccionado + '-15').toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   document.getElementById('indicadoresResumen').innerHTML = `
-    <div class="indicador"><div class="etiqueta">Ventas del mes</div><div class="valor">${pesos(ventasMes)}</div><div class="detalle">${cierresMes.length} cierres · ${nombreMes}</div></div>
+    ${sinRevisar ? `<div class="indicador" style="border-color:#f4c26b;background:#fffaf0;cursor:pointer" data-ir-caja><div class="etiqueta">Cierres sin revisar</div><div class="valor" style="color:var(--ambar)">${sinRevisar}</div><div class="detalle">Enviados por empleados · tocá para ver</div></div>` : ''}
+    <div class="indicador"><div class="etiqueta">Ventas del mes</div><div class="valor">${pesos(ventasMes)}</div><div class="detalle">Efectivo ${pesos(sumar(cierresMes, 'ventasEfectivo'))} · MP ${pesos(sumar(cierresMes, 'ventasMercadoPago'))}</div></div>
     <div class="indicador ${diferenciasMes < 0 ? 'alerta' : ''}"><div class="etiqueta">Diferencias de caja</div><div class="valor">${diferenciasMes > 0 ? '+' : ''}${pesos(diferenciasMes)}</div><div class="detalle">Sobrantes y faltantes del mes</div></div>
     <div class="indicador"><div class="etiqueta">Pagado a proveedores</div><div class="valor">${pesos(pagadoMes)}</div><div class="detalle">Contado + pagos de deuda</div></div>
     <div class="indicador"><div class="etiqueta">Gastos del mes</div><div class="valor">${pesos(gastosMes)}</div></div>
@@ -1026,6 +1086,7 @@ function actualizarInsignia() {
 function dibujarTodo() {
   document.getElementById('listaProveedores').innerHTML = nombresProveedores().map(n => `<option value="${escapar(n)}">`).join('');
   dibujarResumen();
+  dibujarSinRevisar();
   dibujarCierres();
   dibujarSaldos();
   dibujarSelectCuenta();
@@ -1063,9 +1124,11 @@ function iniciar() {
 
   // Botones dentro de las tablas (delegación de eventos)
   document.body.addEventListener('click', e => {
+    if (e.target.closest('[data-ir-caja]')) { cambiarVista('caja'); return; }
     const b = e.target.closest('button');
     if (!b) return;
-    if (b.dataset.editar) editarRegistro(b.dataset.editar, b.dataset.id);
+    if (b.dataset.revisar) marcarRevisado(b.dataset.revisar);
+    else if (b.dataset.editar) editarRegistro(b.dataset.editar, b.dataset.id);
     else if (b.dataset.eliminar) eliminarRegistro(b.dataset.eliminar, b.dataset.id);
     else if (b.dataset.pagar !== undefined) { cambiarVista('proveedores'); prepararPago(b.dataset.pagar); }
     else if (b.dataset.verCuenta !== undefined) {
