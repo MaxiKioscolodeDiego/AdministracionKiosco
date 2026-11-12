@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiosco · Administración</title>
+<style>
+  :root {
+    --fondo: #f5f3ee;
+    --tarjeta: #ffffff;
+    --texto: #1d2125;
+    --suave: #6b7280;
+    --borde: #e4e0d6;
+    --primario: #1f6f5c;
+    --primario-oscuro: #17574a;
+    --primario-claro: #e4f1ec;
+    --rojo: #b42318;
+    --rojo-claro: #fdecea;
+    --ambar: #a15c07;
+    --ambar-claro: #fef3e2;
+    --verde: #1f7a3a;
+    --radio: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--fondo);
+    color: var(--texto);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .barra-superior { position: sticky; top: 0; z-index: 20; }
+  header {
+    background: var(--primario);
+    color: #fff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 18px; margin: 0; flex: 1; min-width: 160px; }
+  .insignia {
+    font-size: 12px;
+    background: rgba(255,255,255,.16);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .insignia.local { background: #f4c26b; color: #3d2a00; }
+  header input[type=month] {
+    border: 0; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: 14px;
+  }
+  .boton-icono {
+    background: rgba(255,255,255,.16); color: #fff; border: 0; border-radius: 8px;
+    padding: 7px 10px; cursor: pointer; font: inherit; font-size: 14px;
+  }
+  .boton-icono:hover { background: rgba(255,255,255,.26); }
+  nav {
+    display: flex; gap: 2px; overflow-x: auto; background: #fff;
+    border-bottom: 1px solid var(--borde); padding: 0 8px;
+  }
+  nav button {
+    background: none; border: 0; padding: 12px 14px; font: inherit; color: var(--suave);
+    cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  nav button.activa { color: var(--primario); border-bottom-color: var(--primario); font-weight: 600; }
+  main { max-width: 1150px; margin: 0 auto; padding: 16px; }
+  .vista { display: none; }
+  .vista.activa { display: block; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  h3 { font-size: 15px; margin: 0 0 10px; }
+  .tarjeta {
+    background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 16px; margin-bottom: 16px;
+  }
+  .grilla-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .grilla-2 > .tarjeta { margin-bottom: 0; }
+  .indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .indicador { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px; }
+  .indicador .etiqueta { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
+  .indicador .valor { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .indicador .detalle { font-size: 12px; color: var(--suave); margin-top: 2px; }
+  .indicador.alerta { border-color: #f1b8b2; background: var(--rojo-claro); }
+  .indicador.alerta .valor { color: var(--rojo); }
+
+  form .campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 12px; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--suave); }
+  label.ancho { grid-column: 1 / -1; }
+  input, select, textarea {
+    font: inherit; font-size: 15px; color: var(--texto); padding: 8px 10px;
+    border: 1px solid var(--borde); border-radius: 8px; background: #fff; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--primario-claro); border-color: var(--primario); }
+  textarea { resize: vertical; min-height: 38px; }
+  .acciones { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+  .boton {
+    border: 0; border-radius: 8px; padding: 9px 16px; font: inherit; font-weight: 600;
+    cursor: pointer; background: var(--primario); color: #fff;
+  }
+  .boton:hover { background: var(--primario-oscuro); }
+  .boton:disabled { opacity: .55; cursor: wait; }
+  .boton.secundario { background: #fff; color: var(--texto); border: 1px solid var(--borde); }
+  .boton.secundario:hover { background: #f4f4f2; }
+  .boton.chico { padding: 5px 10px; font-size: 13px; font-weight: 500; }
+  .boton.peligro { background: #fff; color: var(--rojo); border: 1px solid #f1b8b2; }
+  .enlace { background: none; border: 0; color: var(--primario); cursor: pointer; font: inherit; font-size: 13px; padding: 0; text-decoration: underline; }
+
+  .calculo {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;
+    margin-top: 14px; padding: 12px; border-radius: 10px; background: #f7f6f2;
+  }
+  .calculo div span { display: block; font-size: 12px; color: var(--suave); }
+  .calculo div strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .positivo { color: var(--verde); }
+  .negativo { color: var(--rojo); }
+
+  .tabla-contenedor { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { font-size: 12px; color: var(--suave); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.total td { font-weight: 700; border-bottom: 0; }
+  td.botones { white-space: nowrap; text-align: right; }
+  .vacio { color: var(--suave); font-size: 14px; padding: 10px 0; }
+  .etiqueta-estado { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .e-vencida { background: var(--rojo-claro); color: var(--rojo); }
+  .e-proxima { background: var(--ambar-claro); color: var(--ambar); }
+  .e-ok { background: var(--primario-claro); color: var(--primario); }
+  .e-neutra { background: #eeede9; color: var(--suave); }
+  .fila-filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+  .fila-filtros label { min-width: 200px; }
+  .nota { font-size: 13px; color: var(--suave); margin: 6px 0 0; }
+
+  dialog { border: 0; border-radius: var(--radio); padding: 20px; width: min(440px, 92vw); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(0,0,0,.35); }
+  dialog label { margin-bottom: 10px; }
+
+  #avisos { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 8px; }
+  .aviso { background: #1d2125; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+  .aviso.error { background: var(--rojo); }
+  .cargando { text-align: center; padding: 40px; color: var(--suave); }
+  .oculto { display: none !important; }
+  @media (max-width: 600px) {
+    main { padding: 12px; }
+    .indicador .valor { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="barra-superior">
+  <header>
+    <h1>🏪 Kiosco · Administración</h1>
+    <span id="insigniaConexion" class="insignia">…</span>
+    <input type="month" id="filtroMes" title="Mes a mostrar">
+    <button class="boton-icono" id="botonRecargar" title="Volver a leer la planilla">⟳</button>
+    <button class="boton-icono" id="botonConfig" title="Configuración">⚙︎</button>
+  </header>
+  <nav id="pestanias">
+    <button data-vista="resumen" class="activa">Resumen</button>
+    <button data-vista="caja">Cierre de caja</button>
+    <button data-vista="proveedores">Proveedores y deudas</button>
+    <button data-vista="gastos">Gastos</button>
+    <button data-vista="agenda">Agenda</button>
+  </nav>
+</div>
+
+<main>
+  <div id="cargando" class="cargando">Cargando datos…</div>
+
+  <!-- ═════════════ RESUMEN ═════════════ -->
+  <section class="vista activa" id="vista-resumen">
+    <div class="indicadores" id="indicadoresResumen"></div>
+    <div class="grilla-2">
+      <div class="tarjeta">
+        <h3>Deudas a vencer o vencidas</h3>
+        <div id="resumenVencimientos"></div>
+      </div>
+      <div class="tarjeta">
+        <h3>Lo que más debés, por proveedor</h3>
+        <div id="resumenSaldos"></div>
+      </div>
+    </div>
+    <div class="tarjeta" style="margin-top:16px">
+      <h3>Gastos del mes por categoría</h3>
+      <div id="resumenGastos"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ CAJA ═════════════ -->
+  <section class="vista" id="vista-caja">
+    <div class="tarjeta">
+      <h2 id="tituloCierre">Nuevo cierre de caja</h2>
+      <form id="formCierre" autocomplete="off">
+        <input type="hidden" name="id">
+        <div class="campos">
+          <label>Fecha <input type="date" name="fecha" required></label>
+          <label>Turno
+            <select name="turno">
+              <option>Mañana</option><option>Tarde</option><option>Noche</option><option>Día completo</option>
+            </select>
+          </label>
+          <label>Responsable <input type="text" name="responsable" placeholder="Quién cierra"></label>
+          <label>Fondo inicial (cambio) <input type="number" name="fondoInicial" step="0.01" min="0" inputmode="decimal"></label>
+        </div>
+        <h3 style="margin-top:16px">Ventas del turno</h3>
+        <div class="campos">
+          <label>Efectivo <input type="number" name="ventasEfectivo" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Tarjeta (débito/crédito) <input type="number" name="ventasTarjeta" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Transferencia / QR <input type="number" name="ventasTransferencia" step="0.01" min="0" inputmode="decimal"></label>
+        </div>
+        <h3 style="margin-top:16px">Salidas de efectivo y recuento</h3>
+        <div class="campos">
+          <label>Pagos hechos desde la caja
+            <input type="number" name="pagosDesdeCaja" step="0.01" min="0" inputmode="decimal">
+            <button type="button" class="enlace" id="botonTraerPagos">Traer lo registrado en esa fecha</button>
+          </label>
+          <label>Retiros (dueño, depósitos) <input type="number" name="retiros" step="0.01" min="0" inputmode="decimal"></label>
+          <label>Efectivo contado <input type="number" name="efectivoContado" step="0.01" min="0" inputmode="decimal" required></label>
+          <label>Fondo que queda para el próximo turno <input type="number" name="fondoSiguiente" step="0.01" min="0" inputmode="decimal"></label>
+          <label class="ancho">Observaciones <textarea name="observaciones" rows="2" placeholder="Faltante explicado, billete falso, etc."></textarea></label>
+        </div>
+        <div class="calculo">
+          <div><span>Total vendido</span><strong id="calcTotalVendido">$ 0</strong></div>
+          <div><span>Efectivo que debería haber</span><strong id="calcEsperado">$ 0</strong></div>
+          <div><span>Diferencia</span><strong id="calcDiferencia">—</strong></div>
+        </div>
+        <div class="acciones">
+          <button class="boton" type="submit">Guardar cierre</button>
+          <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+        </div>
+      </form>
+    </div>
+    <div class="tarjeta">
+      <h3>Cierres del mes</h3>
+      <div class="tabla-contenedor" id="tablaCierres"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ PROVEEDORES Y DEUDAS ═════════════ -->
+  <section class="vista" id="vista-proveedores">
+    <div class="tarjeta">
+      <h2>Saldo con cada proveedor</h2>
+      <div class="tabla-contenedor" id="tablaSaldos"></div>
+    </div>
+
+    <div class="grilla-2">
+      <div class="tarjeta">
+        <h2 id="tituloDeuda">Registrar deuda</h2>
+        <p class="nota" style="margin:-6px 0 12px">Mercadería que te dejaron "a pagar".</p>
+        <form id="formDeuda" autocomplete="off">
+          <input type="hidden" name="id">
+          <div class="campos">
+            <label>Fecha <input type="date" name="fecha" required></label>
+            <label>Proveedor <input type="text" name="proveedor" list="listaProveedores" required></label>
+            <label>Monto <input type="number" name="monto" step="0.01" min="0.01" inputmode="decimal" required></label>
+            <label>Vence el <input type="date" name="vencimiento"></label>
+            <label>Comprobante / remito <input type="text" name="comprobante" placeholder="Opcional"></label>
+            <label class="ancho">Notas <textarea name="notas" rows="2"></textarea></label>
+          </div>
+          <div class="acciones">
+            <button class="boton" type="submit">Guardar deuda</button>
+            <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="tarjeta">
+        <h2 id="tituloPago">Registrar pago</h2>
+        <p class="nota" style="margin:-6px 0 12px">Puede ser una compra al contado o un pago (total o parcial) de lo que debés.</p>
+        <form id="formPago" autocomplete="off">
+          <input type="hidden" name="id">
+          <div class="campos">
+            <label>Fecha <input type="date" name="fecha" required></label>
+            <label>Proveedor <input type="text" name="proveedor" list="listaProveedores" required></label>
+            <label>Tipo
+              <select name="tipo">
+                <option value="A cuenta">Pago de deuda (a cuenta)</option>
+                <option value="Contado">Compra al contado</option>
+              </select>
+            </label>
+            <label>Monto <input type="number" name="monto" step="0.01" min="0.01" inputmode="decimal" required></label>
+            <label>Medio de pago
+              <select name="medio">
+                <option>Efectivo de caja</option>
+                <option>Efectivo (fuera de caja)</option>
+                <option>Transferencia / Mercado Pago</option>
+                <option>Tarjeta</option>
+                <option>Cheque</option>
+              </select>
+            </label>
+            <label>Comprobante <input type="text" name="comprobante" placeholder="Opcional"></label>
+            <label class="ancho">Notas <textarea name="notas" rows="2"></textarea></label>
+          </div>
+          <p class="nota" id="notaSaldoPago"></p>
+          <div class="acciones">
+            <button class="boton" type="submit">Guardar pago</button>
+            <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="tarjeta" style="margin-top:16px">
+      <h2>Cuenta corriente</h2>
+      <div class="fila-filtros">
+        <label>Proveedor
+          <select id="selectCuenta"></select>
+        </label>
+      </div>
+      <div id="detalleCuenta"></div>
+    </div>
+
+    <div class="tarjeta">
+      <h3>Movimientos del mes</h3>
+      <div class="tabla-contenedor" id="tablaMovimientosMes"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ GASTOS ═════════════ -->
+  <section class="vista" id="vista-gastos">
+    <div class="tarjeta">
+      <h2 id="tituloGasto">Registrar gasto</h2>
+      <form id="formGasto" autocomplete="off">
+        <input type="hidden" name="id">
+        <div class="campos">
+          <label>Fecha <input type="date" name="fecha" required></label>
+          <label>Categoría
+            <select name="categoria">
+              <option>Alquiler</option>
+              <option>Luz</option>
+              <option>Gas</option>
+              <option>Agua</option>
+              <option>Internet / Teléfono</option>
+              <option>Impuestos / Monotributo</option>
+              <option>Sueldos</option>
+              <option>Insumos (bolsas, limpieza)</option>
+              <option>Mantenimiento</option>
+              <option>Comisiones / Banco</option>
+              <option>Otros</option>
+            </select>
+          </label>
+          <label>Descripción <input type="text" name="descripcion" placeholder="Ej: factura bimestral"></label>
+          <label>Monto <input type="number" name="monto" step="0.01" min="0.01" inputmode="decimal" required></label>
+          <label>Medio de pago
+            <select name="medio">
+              <option>Efectivo de caja</option>
+              <option>Efectivo (fuera de caja)</option>
+              <option>Transferencia / Mercado Pago</option>
+              <option>Tarjeta</option>
+              <option>Débito automático</option>
+            </select>
+          </label>
+          <label class="ancho">Notas <textarea name="notas" rows="2"></textarea></label>
+        </div>
+        <div class="acciones">
+          <button class="boton" type="submit">Guardar gasto</button>
+          <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+        </div>
+      </form>
+    </div>
+    <div class="tarjeta">
+      <h3>Gastos del mes</h3>
+      <div class="tabla-contenedor" id="tablaGastos"></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ AGENDA ═════════════ -->
+  <section class="vista" id="vista-agenda">
+    <div class="tarjeta">
+      <h2 id="tituloProveedor">Agregar proveedor</h2>
+      <form id="formProveedor" autocomplete="off">
+        <input type="hidden" name="id">
+        <div class="campos">
+          <label>Nombre <input type="text" name="nombre" required></label>
+          <label>Rubro <input type="text" name="rubro" placeholder="Golosinas, bebidas, cigarrillos…"></label>
+          <label>Teléfono / WhatsApp <input type="tel" name="telefono" placeholder="11 2345 6789"></label>
+          <label>Días de visita <input type="text" name="diasVisita" placeholder="Ej: martes y viernes"></label>
+          <label class="ancho">Notas <textarea name="notas" rows="2" placeholder="Nombre del preventista, plazo que da, etc."></textarea></label>
+        </div>
+        <div class="acciones">
+          <button class="boton" type="submit">Guardar proveedor</button>
+          <button class="boton secundario oculto" type="button" data-cancelar>Cancelar edición</button>
+        </div>
+      </form>
+    </div>
+    <div class="tarjeta">
+      <h3>Proveedores</h3>
+      <div class="tabla-contenedor" id="tablaProveedores"></div>
+    </div>
+  </section>
+</main>
+
+<datalist id="listaProveedores"></datalist>
+
+<!-- Configuración -->
+<dialog id="dialogoConfig">
+  <h2>Conexión con Google Sheets</h2>
+  <label>URL de la aplicación web (Apps Script)
+    <input type="url" id="configUrl" placeholder="https://script.google.com/macros/s/…/exec">
+  </label>
+  <label>Clave de acceso
+    <input type="password" id="configClave" placeholder="La misma que pusiste en Codigo.gs">
+  </label>
+  <p class="nota">Si dejás la URL vacía, la app funciona en <b>modo prueba</b>: guarda los datos solo en este navegador.</p>
+  <div class="acciones">
+    <button class="boton" id="botonGuardarConfig">Guardar y conectar</button>
+    <button class="boton secundario" id="botonCerrarConfig">Cerrar</button>
+  </div>
+</dialog>
+
+<div id="avisos"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ESTADO GENERAL
+   ══════════════════════════════════════════════════════════════ */
+const TIPOS = ['cierres', 'deudas', 'pagos', 'gastos', 'proveedores'];
+let datos = datosVacios();
+let configuracion = leerConfiguracion();
+let mesSeleccionado = fechaLocal().slice(0, 7);   // "aaaa-mm"
+
+function datosVacios() {
+  return { cierres: [], deudas: [], pagos: [], gastos: [], proveedores: [] };
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CONFIGURACIÓN (se guarda en este navegador)
+   ══════════════════════════════════════════════════════════════ */
+function leerConfiguracion() {
+  try { return JSON.parse(localStorage.getItem('kiosco_config')) || { url: '', clave: '' }; }
+  catch (e) { return { url: '', clave: '' }; }
+}
+function guardarConfiguracion(nueva) {
+  configuracion = nueva;
+  try { localStorage.setItem('kiosco_config', JSON.stringify(nueva)); } catch (e) {}
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMUNICACIÓN CON GOOGLE SHEETS (o modo prueba local)
+   ══════════════════════════════════════════════════════════════ */
+async function llamarApi(accion, parametros = {}) {
+  if (!configuracion.url) return apiLocal(accion, parametros);
+  // text/plain evita el "preflight" CORS, que Apps Script no responde
+  const respuesta = await fetch(configuracion.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ accion, clave: configuracion.clave, ...parametros })
+  });
+  const json = await respuesta.json();
+  if (!json.ok) throw new Error(json.error || 'Error desconocido');
+  return json.datos;
+}
+
+// Modo prueba: mismas operaciones, pero guardando en localStorage
+let baseLocal = null;
+function apiLocal(accion, p) {
+  if (!baseLocal) {
+    try { baseLocal = JSON.parse(localStorage.getItem('kiosco_datos')) || datosVacios(); }
+    catch (e) { baseLocal = datosVacios(); }
+    TIPOS.forEach(t => { if (!baseLocal[t]) baseLocal[t] = []; });
+  }
+  let resultado;
+  if (accion === 'listarTodo') {
+    resultado = baseLocal;
+  } else if (accion === 'crear') {
+    const registro = { ...p.datos, id: generarId(), registrado: fechaLocal() + ' ' + horaLocal() };
+    baseLocal[p.tipo].push(registro);
+    resultado = registro;
+  } else if (accion === 'actualizar') {
+    const i = baseLocal[p.tipo].findIndex(r => r.id === p.datos.id);
+    if (i < 0) throw new Error('No se encontró el registro');
+    baseLocal[p.tipo][i] = { ...baseLocal[p.tipo][i], ...p.datos };
+    resultado = baseLocal[p.tipo][i];
+  } else if (accion === 'eliminar') {
+    baseLocal[p.tipo] = baseLocal[p.tipo].filter(r => r.id !== p.id);
+    resultado = true;
+  }
+  try { localStorage.setItem('kiosco_datos', JSON.stringify(baseLocal)); } catch (e) {}
+  return Promise.resolve(JSON.parse(JSON.stringify(resultado)));
+}
+
+async function cargarTodo() {
+  document.getElementById('cargando').classList.remove('oculto');
+  try {
+    const recibido = await llamarApi('listarTodo');
+    datos = datosVacios();
+    TIPOS.forEach(t => { datos[t] = recibido[t] || []; });
+  } catch (e) {
+    mostrarAviso('No se pudo leer la planilla: ' + e.message, true);
+  } finally {
+    document.getElementById('cargando').classList.add('oculto');
+  }
+  actualizarInsignia();
+  dibujarTodo();
+  if (!document.getElementById('formCierre').elements.id.value) valoresPorDefectoCierre();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   UTILIDADES
+   ══════════════════════════════════════════════════════════════ */
+const formatoPesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 2 });
+function pesos(n) { return formatoPesos.format(Number(n) || 0); }
+function num(v) { return Number(v) || 0; }
+function redondear(n) { return Math.round(n * 100) / 100; }
+
+function fechaLocal(fecha = new Date()) {
+  const a = fecha.getFullYear(), m = String(fecha.getMonth() + 1).padStart(2, '0'), d = String(fecha.getDate()).padStart(2, '0');
+  return `${a}-${m}-${d}`;
+}
+function horaLocal() {
+  const f = new Date();
+  return String(f.getHours()).padStart(2, '0') + ':' + String(f.getMinutes()).padStart(2, '0');
+}
+function sumarDias(fechaTexto, dias) {
+  const [a, m, d] = fechaTexto.split('-').map(Number);
+  return fechaLocal(new Date(a, m - 1, d + dias));
+}
+function fechaLinda(texto) {
+  if (!texto) return '—';
+  const [a, m, d] = texto.slice(0, 10).split('-');
+  return `${d}/${m}/${a}`;
+}
+function delMes(fecha) { return (fecha || '').slice(0, 7) === mesSeleccionado; }
+function generarId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function escapar(texto) {
+  return String(texto ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// Para agrupar proveedores aunque estén escritos con mayúsculas o espacios distintos
+function claveProveedor(nombre) { return String(nombre || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+function ordenarPorFecha(a, b) {
+  return (a.fecha || '').localeCompare(b.fecha || '') || String(a.registrado || '').localeCompare(String(b.registrado || ''));
+}
+function sumar(lista, campo = 'monto') { return lista.reduce((t, r) => t + num(r[campo]), 0); }
+
+function mostrarAviso(texto, esError = false) {
+  const div = document.createElement('div');
+  div.className = 'aviso' + (esError ? ' error' : '');
+  div.textContent = texto;
+  document.getElementById('avisos').appendChild(div);
+  setTimeout(() => div.remove(), esError ? 6000 : 2500);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FORMULARIOS (lectura, carga, guardado genérico)
+   ══════════════════════════════════════════════════════════════ */
+function leerFormulario(form) {
+  const objeto = {};
+  for (const campo of form.elements) {
+    if (!campo.name) continue;
+    objeto[campo.name] = campo.type === 'number' ? redondear(num(campo.value)) : campo.value.trim();
+  }
+  return objeto;
+}
+
+function cargarEnFormulario(form, registro, titulo, textoTitulo) {
+  for (const campo of form.elements) {
+    if (campo.name && registro[campo.name] !== undefined) campo.value = registro[campo.name];
+  }
+  form.querySelector('[data-cancelar]').classList.remove('oculto');
+  form.querySelector('button[type=submit]').textContent = 'Guardar cambios';
+  if (titulo) document.getElementById(titulo).textContent = textoTitulo;
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Cada formulario sabe qué tipo guarda, cómo completar valores por defecto y qué título lleva
+const FORMULARIOS = {
+  formCierre:    { tipo: 'cierres',     titulo: 'tituloCierre',    textoNuevo: 'Nuevo cierre de caja', textoBoton: 'Guardar cierre',    porDefecto: valoresPorDefectoCierre, preparar: prepararCierre },
+  formDeuda:     { tipo: 'deudas',      titulo: 'tituloDeuda',     textoNuevo: 'Registrar deuda',      textoBoton: 'Guardar deuda',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
+  formPago:      { tipo: 'pagos',       titulo: 'tituloPago',      textoNuevo: 'Registrar pago',       textoBoton: 'Guardar pago',      porDefecto: f => { f.elements.fecha.value = fechaLocal(); actualizarNotaSaldo(); } },
+  formGasto:     { tipo: 'gastos',      titulo: 'tituloGasto',     textoNuevo: 'Registrar gasto',      textoBoton: 'Guardar gasto',     porDefecto: f => { f.elements.fecha.value = fechaLocal(); } },
+  formProveedor: { tipo: 'proveedores', titulo: 'tituloProveedor', textoNuevo: 'Agregar proveedor',    textoBoton: 'Guardar proveedor', porDefecto: () => {} }
+};
+
+function limpiarFormulario(idForm) {
+  const form = document.getElementById(idForm);
+  const def = FORMULARIOS[idForm];
+  form.reset();
+  form.elements.id.value = '';
+  form.querySelector('[data-cancelar]').classList.add('oculto');
+  form.querySelector('button[type=submit]').textContent = def.textoBoton;
+  document.getElementById(def.titulo).textContent = def.textoNuevo;
+  def.porDefecto(form);
+}
+
+async function guardarFormulario(evento) {
+  evento.preventDefault();
+  const form = evento.target;
+  const def = FORMULARIOS[form.id];
+  const boton = form.querySelector('button[type=submit]');
+  let registro = leerFormulario(form);
+  if (def.preparar) registro = def.preparar(registro);
+
+  boton.disabled = true;
+  try {
+    if (registro.id) {
+      const actualizado = await llamarApi('actualizar', { tipo: def.tipo, datos: registro });
+      datos[def.tipo] = datos[def.tipo].map(r => r.id === actualizado.id ? actualizado : r);
+      mostrarAviso('Cambios guardados');
+    } else {
+      delete registro.id;
+      const creado = await llamarApi('crear', { tipo: def.tipo, datos: registro });
+      datos[def.tipo].push(creado);
+      mostrarAviso('Guardado en la planilla');
+    }
+    limpiarFormulario(form.id);
+    dibujarTodo();
+  } catch (e) {
+    mostrarAviso('No se pudo guardar: ' + e.message, true);
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+async function eliminarRegistro(tipo, id) {
+  if (!confirm('¿Eliminar este registro? También se borra de la planilla.')) return;
+  try {
+    await llamarApi('eliminar', { tipo, id });
+    datos[tipo] = datos[tipo].filter(r => r.id !== id);
+    dibujarTodo();
+    mostrarAviso('Registro eliminado');
+  } catch (e) {
+    mostrarAviso('No se pudo eliminar: ' + e.message, true);
+  }
+}
+
+function editarRegistro(tipo, id) {
+  const registro = datos[tipo].find(r => r.id === id);
+  if (!registro) return;
+  const idForm = Object.keys(FORMULARIOS).find(k => FORMULARIOS[k].tipo === tipo);
+  const vistaDelTipo = { cierres: 'caja', deudas: 'proveedores', pagos: 'proveedores', gastos: 'gastos', proveedores: 'agenda' }[tipo];
+  cambiarVista(vistaDelTipo);
+  const textos = { cierres: 'Editando cierre', deudas: 'Editando deuda', pagos: 'Editando pago', gastos: 'Editando gasto', proveedores: 'Editando proveedor' };
+  cargarEnFormulario(document.getElementById(idForm), registro, FORMULARIOS[idForm].titulo, textos[tipo]);
+  if (tipo === 'cierres') calcularCierre();
+  if (tipo === 'pagos') actualizarNotaSaldo();
+}
+
+function botonesFila(tipo, id) {
+  return `<td class="botones">
+    <button class="boton secundario chico" data-editar="${tipo}" data-id="${id}">Editar</button>
+    <button class="boton peligro chico" data-eliminar="${tipo}" data-id="${id}">✕</button>
+  </td>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CIERRE DE CAJA
+   ══════════════════════════════════════════════════════════════ */
+function ultimoCierre() {
+  return [...datos.cierres].sort(ordenarPorFecha).pop();
+}
+
+function valoresPorDefectoCierre(form = document.getElementById('formCierre')) {
+  form.elements.fecha.value = fechaLocal();
+  const anterior = ultimoCierre();
+  // El fondo inicial sugerido es lo que dejó el turno anterior
+  if (anterior && num(anterior.fondoSiguiente) > 0) form.elements.fondoInicial.value = anterior.fondoSiguiente;
+  calcularCierre();
+}
+
+function calcularCierre() {
+  const f = document.getElementById('formCierre').elements;
+  const v = nombre => num(f[nombre].value);
+  const totalVendido = v('ventasEfectivo') + v('ventasTarjeta') + v('ventasTransferencia');
+  const esperado = v('fondoInicial') + v('ventasEfectivo') - v('pagosDesdeCaja') - v('retiros');
+  document.getElementById('calcTotalVendido').textContent = pesos(totalVendido);
+  document.getElementById('calcEsperado').textContent = pesos(esperado);
+
+  const celda = document.getElementById('calcDiferencia');
+  if (f.efectivoContado.value === '') {
+    celda.textContent = '—';
+    celda.className = '';
+  } else {
+    const diferencia = redondear(v('efectivoContado') - esperado);
+    celda.textContent = (diferencia > 0 ? '+' : '') + pesos(diferencia) + (diferencia === 0 ? ' ✓' : diferencia > 0 ? ' (sobra)' : ' (falta)');
+    celda.className = diferencia < 0 ? 'negativo' : 'positivo';
+  }
+}
+
+function prepararCierre(registro) {
+  registro.efectivoEsperado = redondear(registro.fondoInicial + registro.ventasEfectivo - registro.pagosDesdeCaja - registro.retiros);
+  registro.diferencia = redondear(registro.efectivoContado - registro.efectivoEsperado);
+  return registro;
+}
+
+// Suma los pagos a proveedores y gastos de esa fecha que salieron del efectivo de la caja
+function traerPagosDeCaja() {
+  const f = document.getElementById('formCierre').elements;
+  const fecha = f.fecha.value;
+  const deCaja = r => r.fecha === fecha && r.medio === 'Efectivo de caja';
+  const total = sumar(datos.pagos.filter(deCaja)) + sumar(datos.gastos.filter(deCaja));
+  f.pagosDesdeCaja.value = redondear(total);
+  calcularCierre();
+  mostrarAviso(total ? `Se encontraron ${pesos(total)} pagados con efectivo de caja` : 'No hay pagos con efectivo de caja en esa fecha');
+}
+
+function dibujarCierres() {
+  const lista = datos.cierres.filter(c => delMes(c.fecha)).sort(ordenarPorFecha).reverse();
+  const contenedor = document.getElementById('tablaCierres');
+  if (!lista.length) { contenedor.innerHTML = '<p class="vacio">No hay cierres cargados en este mes.</p>'; return; }
+
+  const filas = lista.map(c => {
+    const total = num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia);
+    const dif = num(c.diferencia);
+    return `<tr>
+      <td>${fechaLinda(c.fecha)}</td>
+      <td>${escapar(c.turno)}</td>
+      <td>${escapar(c.responsable)}</td>
+      <td class="num">${pesos(total)}</td>
+      <td class="num">${pesos(c.ventasEfectivo)}</td>
+      <td class="num">${pesos(c.efectivoContado)}</td>
+      <td class="num ${dif < 0 ? 'negativo' : dif > 0 ? 'positivo' : ''}">${dif > 0 ? '+' : ''}${pesos(dif)}</td>
+      <td>${escapar(c.observaciones)}</td>
+      ${botonesFila('cierres', c.id)}
+    </tr>`;
+  }).join('');
+
+  const totalMes = lista.reduce((t, c) => t + num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia), 0);
+  const difMes = sumar(lista, 'diferencia');
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Turno</th><th>Responsable</th><th class="num">Vendido</th><th class="num">Efectivo</th><th class="num">Contado</th><th class="num">Diferencia</th><th>Obs.</th><th></th></tr></thead>
+    <tbody>${filas}
+      <tr class="total"><td colspan="3">Total del mes</td><td class="num">${pesos(totalMes)}</td><td></td><td></td>
+      <td class="num ${difMes < 0 ? 'negativo' : ''}">${pesos(difMes)}</td><td colspan="2"></td></tr>
+    </tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PROVEEDORES: SALDOS Y CUENTA CORRIENTE
+   ══════════════════════════════════════════════════════════════ */
+
+// Junta todos los nombres de proveedor (agenda + deudas + pagos) sin duplicar
+function nombresProveedores() {
+  const mapa = new Map();
+  [...datos.proveedores.map(p => p.nombre), ...datos.deudas.map(d => d.proveedor), ...datos.pagos.map(p => p.proveedor)]
+    .forEach(n => { const k = claveProveedor(n); if (k && !mapa.has(k)) mapa.set(k, n.trim()); });
+  return [...mapa.values()].sort((a, b) => a.localeCompare(b, 'es'));
+}
+
+/**
+ * Estado de la cuenta con un proveedor.
+ * Los pagos "A cuenta" se aplican a las deudas más viejas primero (como hace cualquier
+ * cuenta corriente), así se sabe qué facturas quedan pendientes y cuáles ya se saldaron.
+ */
+function estadoCuenta(nombre) {
+  const k = claveProveedor(nombre);
+  const deudas = datos.deudas.filter(d => claveProveedor(d.proveedor) === k).sort(ordenarPorFecha);
+  const pagosACuenta = datos.pagos.filter(p => claveProveedor(p.proveedor) === k && p.tipo === 'A cuenta');
+  let disponible = sumar(pagosACuenta);
+
+  const facturas = deudas.map(d => {
+    const aplicado = Math.min(disponible, num(d.monto));
+    disponible = redondear(disponible - aplicado);
+    return { ...d, pagado: aplicado, saldo: redondear(num(d.monto) - aplicado) };
+  });
+
+  const totalDeuda = sumar(deudas);
+  const totalPagado = sumar(pagosACuenta);
+  return {
+    nombre,
+    totalDeuda,
+    totalPagado,
+    saldo: redondear(totalDeuda - totalPagado),   // negativo = saldo a favor tuyo
+    facturas,
+    pendientes: facturas.filter(f => f.saldo > 0)
+  };
+}
+
+function estadoVencimiento(factura) {
+  const hoy = fechaLocal();
+  if (factura.saldo <= 0) return '<span class="etiqueta-estado e-ok">Saldada</span>';
+  if (!factura.vencimiento) return '<span class="etiqueta-estado e-neutra">Sin vencimiento</span>';
+  if (factura.vencimiento < hoy) return `<span class="etiqueta-estado e-vencida">Vencida ${fechaLinda(factura.vencimiento)}</span>`;
+  if (factura.vencimiento <= sumarDias(hoy, 7)) return `<span class="etiqueta-estado e-proxima">Vence ${fechaLinda(factura.vencimiento)}</span>`;
+  return `<span class="etiqueta-estado e-neutra">Vence ${fechaLinda(factura.vencimiento)}</span>`;
+}
+
+function todasLasCuentas() {
+  return nombresProveedores().map(estadoCuenta);
+}
+
+function dibujarSaldos() {
+  const cuentas = todasLasCuentas().filter(c => c.totalDeuda > 0 || c.totalPagado > 0);
+  const contenedor = document.getElementById('tablaSaldos');
+  if (!cuentas.length) { contenedor.innerHTML = '<p class="vacio">Todavía no registraste deudas con proveedores.</p>'; return; }
+
+  cuentas.sort((a, b) => b.saldo - a.saldo);
+  const filas = cuentas.map(c => {
+    const proxima = c.pendientes.filter(f => f.vencimiento).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento))[0];
+    return `<tr>
+      <td><button class="enlace" data-ver-cuenta="${escapar(c.nombre)}">${escapar(c.nombre)}</button></td>
+      <td class="num">${pesos(c.totalDeuda)}</td>
+      <td class="num">${pesos(c.totalPagado)}</td>
+      <td class="num ${c.saldo > 0 ? 'negativo' : 'positivo'}"><b>${c.saldo < 0 ? 'A favor ' + pesos(-c.saldo) : pesos(c.saldo)}</b></td>
+      <td>${proxima ? estadoVencimiento(proxima) : (c.saldo > 0 ? '<span class="etiqueta-estado e-neutra">Sin vencimiento</span>' : '<span class="etiqueta-estado e-ok">Al día</span>')}</td>
+      <td class="botones">${c.saldo > 0 ? `<button class="boton chico" data-pagar="${escapar(c.nombre)}">Pagar</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  const totalSaldo = cuentas.reduce((t, c) => t + Math.max(c.saldo, 0), 0);
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Proveedor</th><th class="num">Deuda total</th><th class="num">Pagado a cuenta</th><th class="num">Saldo</th><th>Próximo vencimiento</th><th></th></tr></thead>
+    <tbody>${filas}<tr class="total"><td colspan="3">Total que debés</td><td class="num negativo">${pesos(totalSaldo)}</td><td colspan="2"></td></tr></tbody>
+  </table>`;
+}
+
+function dibujarSelectCuenta() {
+  const select = document.getElementById('selectCuenta');
+  const anterior = select.value;
+  const nombres = nombresProveedores();
+  select.innerHTML = '<option value="">— Elegí un proveedor —</option>' + nombres.map(n => `<option>${escapar(n)}</option>`).join('');
+  if (nombres.includes(anterior)) select.value = anterior;
+  dibujarCuentaCorriente();
+}
+
+function dibujarCuentaCorriente() {
+  const nombre = document.getElementById('selectCuenta').value;
+  const contenedor = document.getElementById('detalleCuenta');
+  if (!nombre) { contenedor.innerHTML = '<p class="vacio">Elegí un proveedor para ver todos sus movimientos y qué facturas quedan pendientes.</p>'; return; }
+
+  const cuenta = estadoCuenta(nombre);
+  const k = claveProveedor(nombre);
+
+  // Movimientos que afectan la deuda, con saldo acumulado
+  const movimientos = [
+    ...datos.deudas.filter(d => claveProveedor(d.proveedor) === k).map(d => ({ ...d, clase: 'deudas', debe: num(d.monto), haber: 0, detalle: 'Deuda' + (d.comprobante ? ' · ' + d.comprobante : '') })),
+    ...datos.pagos.filter(p => claveProveedor(p.proveedor) === k).map(p => ({ ...p, clase: 'pagos', debe: 0, haber: p.tipo === 'A cuenta' ? num(p.monto) : 0, detalle: (p.tipo === 'A cuenta' ? 'Pago a cuenta' : 'Compra al contado (no afecta la deuda)') + ' · ' + p.medio }))
+  ].sort(ordenarPorFecha);
+
+  let saldo = 0;
+  const filasMov = movimientos.map(m => {
+    saldo = redondear(saldo + m.debe - m.haber);
+    const montoContado = m.clase === 'pagos' && m.tipo === 'Contado' ? `<span style="color:var(--suave)">${pesos(m.monto)}</span>` : '';
+    return `<tr>
+      <td>${fechaLinda(m.fecha)}</td>
+      <td>${escapar(m.detalle)}${m.notas ? `<br><small style="color:var(--suave)">${escapar(m.notas)}</small>` : ''}</td>
+      <td class="num">${m.debe ? pesos(m.debe) : ''}</td>
+      <td class="num">${m.haber ? pesos(m.haber) : montoContado}</td>
+      <td class="num">${pesos(saldo)}</td>
+      ${botonesFila(m.clase, m.id)}
+    </tr>`;
+  }).join('');
+
+  const filasFacturas = cuenta.facturas.filter(f => f.saldo > 0).map(f => `<tr>
+      <td>${fechaLinda(f.fecha)}</td><td>${escapar(f.comprobante) || '—'}</td>
+      <td class="num">${pesos(f.monto)}</td><td class="num">${pesos(f.pagado)}</td>
+      <td class="num"><b>${pesos(f.saldo)}</b></td><td>${estadoVencimiento(f)}</td></tr>`).join('');
+
+  contenedor.innerHTML = `
+    <div class="indicadores">
+      <div class="indicador"><div class="etiqueta">Deuda total</div><div class="valor">${pesos(cuenta.totalDeuda)}</div></div>
+      <div class="indicador"><div class="etiqueta">Pagado a cuenta</div><div class="valor">${pesos(cuenta.totalPagado)}</div></div>
+      <div class="indicador ${cuenta.saldo > 0 ? 'alerta' : ''}"><div class="etiqueta">${cuenta.saldo < 0 ? 'Saldo a tu favor' : 'Saldo pendiente'}</div><div class="valor">${pesos(Math.abs(cuenta.saldo))}</div></div>
+    </div>
+    ${filasFacturas ? `<h3>Deudas pendientes</h3><div class="tabla-contenedor"><table>
+      <thead><tr><th>Fecha</th><th>Comprobante</th><th class="num">Monto</th><th class="num">Pagado</th><th class="num">Resta</th><th>Estado</th></tr></thead>
+      <tbody>${filasFacturas}</tbody></table></div>
+      <p class="nota">Los pagos a cuenta se descuentan de las deudas más viejas primero.</p><br>` : ''}
+    <h3>Movimientos</h3>
+    ${movimientos.length ? `<div class="tabla-contenedor"><table>
+      <thead><tr><th>Fecha</th><th>Detalle</th><th class="num">Debe</th><th class="num">Pagado</th><th class="num">Saldo</th><th></th></tr></thead>
+      <tbody>${filasMov}</tbody></table></div>` : '<p class="vacio">Sin movimientos.</p>'}`;
+}
+
+function dibujarMovimientosMes() {
+  const lista = [
+    ...datos.deudas.filter(d => delMes(d.fecha)).map(d => ({ ...d, clase: 'deudas', etiqueta: '<span class="etiqueta-estado e-vencida">Deuda</span>', medio: '—' })),
+    ...datos.pagos.filter(p => delMes(p.fecha)).map(p => ({ ...p, clase: 'pagos', etiqueta: p.tipo === 'A cuenta' ? '<span class="etiqueta-estado e-ok">Pago a cuenta</span>' : '<span class="etiqueta-estado e-neutra">Contado</span>' }))
+  ].sort(ordenarPorFecha).reverse();
+
+  const contenedor = document.getElementById('tablaMovimientosMes');
+  if (!lista.length) { contenedor.innerHTML = '<p class="vacio">Sin movimientos con proveedores en este mes.</p>'; return; }
+
+  const pagadoMes = sumar(datos.pagos.filter(p => delMes(p.fecha)));
+  const deudaMes = sumar(datos.deudas.filter(d => delMes(d.fecha)));
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Proveedor</th><th>Tipo</th><th>Medio</th><th>Comprobante</th><th class="num">Monto</th><th></th></tr></thead>
+    <tbody>${lista.map(m => `<tr>
+      <td>${fechaLinda(m.fecha)}</td><td>${escapar(m.proveedor)}</td><td>${m.etiqueta}</td>
+      <td>${escapar(m.medio)}</td><td>${escapar(m.comprobante) || '—'}</td><td class="num">${pesos(m.monto)}</td>
+      ${botonesFila(m.clase, m.id)}</tr>`).join('')}
+      <tr class="total"><td colspan="5">Pagado en el mes</td><td class="num">${pesos(pagadoMes)}</td><td></td></tr>
+      <tr class="total"><td colspan="5">Deuda nueva en el mes</td><td class="num">${pesos(deudaMes)}</td><td></td></tr>
+    </tbody></table>`;
+}
+
+// Muestra cuánto se le debe al proveedor mientras se carga un pago
+function actualizarNotaSaldo() {
+  const f = document.getElementById('formPago').elements;
+  const nota = document.getElementById('notaSaldoPago');
+  const nombre = f.proveedor.value.trim();
+  if (!nombre || f.tipo.value !== 'A cuenta') { nota.textContent = ''; return; }
+  const cuenta = estadoCuenta(nombre);
+  // Si se está editando un pago, su monto ya está descontado del saldo
+  const editando = f.id.value ? datos.pagos.find(p => p.id === f.id.value) : null;
+  const saldo = cuenta.saldo + (editando && editando.tipo === 'A cuenta' ? num(editando.monto) : 0);
+  nota.textContent = saldo > 0 ? `Le debés ${pesos(saldo)} a ${nombre}.` : `No tenés deuda registrada con ${nombre}.`;
+}
+
+function prepararPago(nombre) {
+  limpiarFormulario('formPago');
+  const f = document.getElementById('formPago');
+  const cuenta = estadoCuenta(nombre);
+  f.elements.proveedor.value = nombre;
+  f.elements.tipo.value = 'A cuenta';
+  f.elements.monto.value = Math.max(cuenta.saldo, 0);
+  actualizarNotaSaldo();
+  f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  f.elements.monto.focus();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GASTOS
+   ══════════════════════════════════════════════════════════════ */
+function dibujarGastos() {
+  const lista = datos.gastos.filter(g => delMes(g.fecha)).sort(ordenarPorFecha).reverse();
+  const contenedor = document.getElementById('tablaGastos');
+  if (!lista.length) { contenedor.innerHTML = '<p class="vacio">No hay gastos cargados en este mes.</p>'; return; }
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Medio</th><th class="num">Monto</th><th></th></tr></thead>
+    <tbody>${lista.map(g => `<tr>
+      <td>${fechaLinda(g.fecha)}</td><td>${escapar(g.categoria)}</td><td>${escapar(g.descripcion)}</td>
+      <td>${escapar(g.medio)}</td><td class="num">${pesos(g.monto)}</td>${botonesFila('gastos', g.id)}</tr>`).join('')}
+      <tr class="total"><td colspan="4">Total del mes</td><td class="num">${pesos(sumar(lista))}</td><td></td></tr>
+    </tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AGENDA DE PROVEEDORES
+   ══════════════════════════════════════════════════════════════ */
+function enlaceWhatsapp(telefono) {
+  let digitos = String(telefono || '').replace(/\D/g, '');
+  if (!digitos) return '';
+  if (digitos.startsWith('0')) digitos = digitos.slice(1);       // 011… → 11…
+  if (digitos.length === 10) digitos = '549' + digitos;           // número argentino sin código de país
+  return `https://wa.me/${digitos}`;
+}
+
+function dibujarAgenda() {
+  const lista = [...datos.proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  const contenedor = document.getElementById('tablaProveedores');
+  if (!lista.length) { contenedor.innerHTML = '<p class="vacio">Agregá tus proveedores para tenerlos a mano (también aparecen como sugerencia al cargar deudas y pagos).</p>'; return; }
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Nombre</th><th>Rubro</th><th>Contacto</th><th>Visita</th><th class="num">Saldo</th><th>Notas</th><th></th></tr></thead>
+    <tbody>${lista.map(p => {
+      const saldo = estadoCuenta(p.nombre).saldo;
+      const wa = enlaceWhatsapp(p.telefono);
+      return `<tr>
+        <td><b>${escapar(p.nombre)}</b></td><td>${escapar(p.rubro)}</td>
+        <td>${p.telefono ? `${escapar(p.telefono)}<br><a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : '—'}</td>
+        <td>${escapar(p.diasVisita) || '—'}</td>
+        <td class="num ${saldo > 0 ? 'negativo' : ''}">${saldo ? pesos(saldo) : '—'}</td>
+        <td>${escapar(p.notas)}</td>${botonesFila('proveedores', p.id)}</tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESUMEN
+   ══════════════════════════════════════════════════════════════ */
+function dibujarResumen() {
+  const cierresMes = datos.cierres.filter(c => delMes(c.fecha));
+  const ventasMes = cierresMes.reduce((t, c) => t + num(c.ventasEfectivo) + num(c.ventasTarjeta) + num(c.ventasTransferencia), 0);
+  const diferenciasMes = sumar(cierresMes, 'diferencia');
+  const pagadoMes = sumar(datos.pagos.filter(p => delMes(p.fecha)));
+  const gastosMes = sumar(datos.gastos.filter(g => delMes(g.fecha)));
+
+  const cuentas = todasLasCuentas();
+  const deudaTotal = cuentas.reduce((t, c) => t + Math.max(c.saldo, 0), 0);
+  const hoy = fechaLocal();
+  const pendientes = cuentas.flatMap(c => c.pendientes.map(f => ({ ...f, nombre: c.nombre })));
+  const vencido = pendientes.filter(f => f.vencimiento && f.vencimiento < hoy).reduce((t, f) => t + f.saldo, 0);
+
+  const nombreMes = new Date(mesSeleccionado + '-15').toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  document.getElementById('indicadoresResumen').innerHTML = `
+    <div class="indicador"><div class="etiqueta">Ventas del mes</div><div class="valor">${pesos(ventasMes)}</div><div class="detalle">${cierresMes.length} cierres · ${nombreMes}</div></div>
+    <div class="indicador ${diferenciasMes < 0 ? 'alerta' : ''}"><div class="etiqueta">Diferencias de caja</div><div class="valor">${diferenciasMes > 0 ? '+' : ''}${pesos(diferenciasMes)}</div><div class="detalle">Sobrantes y faltantes del mes</div></div>
+    <div class="indicador"><div class="etiqueta">Pagado a proveedores</div><div class="valor">${pesos(pagadoMes)}</div><div class="detalle">Contado + pagos de deuda</div></div>
+    <div class="indicador"><div class="etiqueta">Gastos del mes</div><div class="valor">${pesos(gastosMes)}</div></div>
+    <div class="indicador"><div class="etiqueta">Ventas − pagos − gastos</div><div class="valor ${ventasMes - pagadoMes - gastosMes < 0 ? 'negativo' : ''}">${pesos(ventasMes - pagadoMes - gastosMes)}</div><div class="detalle">Flujo aproximado del mes</div></div>
+    <div class="indicador ${vencido > 0 ? 'alerta' : ''}"><div class="etiqueta">Deuda con proveedores</div><div class="valor">${pesos(deudaTotal)}</div><div class="detalle">${vencido > 0 ? pesos(vencido) + ' vencido' : 'Nada vencido'}</div></div>`;
+
+  // Vencimientos: lo vencido y lo que vence en los próximos 7 días
+  const limite = sumarDias(hoy, 7);
+  const urgentes = pendientes.filter(f => f.vencimiento && f.vencimiento <= limite).sort((a, b) => a.vencimiento.localeCompare(b.vencimiento));
+  document.getElementById('resumenVencimientos').innerHTML = urgentes.length
+    ? `<table><tbody>${urgentes.map(f => `<tr><td>${escapar(f.nombre)}</td><td>${estadoVencimiento(f)}</td><td class="num"><b>${pesos(f.saldo)}</b></td>
+        <td class="botones"><button class="boton chico" data-pagar="${escapar(f.nombre)}">Pagar</button></td></tr>`).join('')}</tbody></table>`
+    : '<p class="vacio">No hay deudas vencidas ni que venzan esta semana. 👌</p>';
+
+  const conSaldo = cuentas.filter(c => c.saldo > 0).sort((a, b) => b.saldo - a.saldo).slice(0, 6);
+  document.getElementById('resumenSaldos').innerHTML = conSaldo.length
+    ? `<table><tbody>${conSaldo.map(c => `<tr><td><button class="enlace" data-ver-cuenta="${escapar(c.nombre)}">${escapar(c.nombre)}</button></td>
+        <td class="num"><b>${pesos(c.saldo)}</b></td></tr>`).join('')}</tbody></table>`
+    : '<p class="vacio">No le debés nada a nadie.</p>';
+
+  const porCategoria = {};
+  datos.gastos.filter(g => delMes(g.fecha)).forEach(g => { porCategoria[g.categoria] = (porCategoria[g.categoria] || 0) + num(g.monto); });
+  const categorias = Object.entries(porCategoria).sort((a, b) => b[1] - a[1]);
+  const maximo = categorias.length ? categorias[0][1] : 0;
+  document.getElementById('resumenGastos').innerHTML = categorias.length
+    ? categorias.map(([cat, monto]) => `
+      <div style="display:grid;grid-template-columns:minmax(120px,200px) 1fr auto;gap:10px;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px">${escapar(cat)}</span>
+        <div style="background:#efede7;border-radius:4px;height:10px"><div style="width:${(monto / maximo * 100).toFixed(1)}%;background:var(--primario);height:10px;border-radius:4px"></div></div>
+        <span class="num" style="font-size:14px;font-variant-numeric:tabular-nums">${pesos(monto)}</span>
+      </div>`).join('')
+    : '<p class="vacio">Sin gastos en este mes.</p>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVEGACIÓN Y DIBUJO GENERAL
+   ══════════════════════════════════════════════════════════════ */
+function cambiarVista(nombre) {
+  document.querySelectorAll('.vista').forEach(v => v.classList.toggle('activa', v.id === 'vista-' + nombre));
+  document.querySelectorAll('#pestanias button').forEach(b => b.classList.toggle('activa', b.dataset.vista === nombre));
+  try { localStorage.setItem('kiosco_vista', nombre); } catch (e) {}
+}
+
+function actualizarInsignia() {
+  const insignia = document.getElementById('insigniaConexion');
+  if (configuracion.url) { insignia.textContent = '● Google Sheets'; insignia.className = 'insignia'; }
+  else { insignia.textContent = 'Modo prueba (sin planilla)'; insignia.className = 'insignia local'; }
+}
+
+function dibujarTodo() {
+  document.getElementById('listaProveedores').innerHTML = nombresProveedores().map(n => `<option value="${escapar(n)}">`).join('');
+  dibujarResumen();
+  dibujarCierres();
+  dibujarSaldos();
+  dibujarSelectCuenta();
+  dibujarMovimientosMes();
+  dibujarGastos();
+  dibujarAgenda();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   EVENTOS
+   ══════════════════════════════════════════════════════════════ */
+function iniciar() {
+  const filtroMes = document.getElementById('filtroMes');
+  filtroMes.value = mesSeleccionado;
+  filtroMes.addEventListener('change', () => { mesSeleccionado = filtroMes.value || fechaLocal().slice(0, 7); dibujarTodo(); });
+
+  document.getElementById('pestanias').addEventListener('click', e => {
+    if (e.target.dataset.vista) cambiarVista(e.target.dataset.vista);
+  });
+  try { const vista = localStorage.getItem('kiosco_vista'); if (vista) cambiarVista(vista); } catch (e) {}
+
+  // Formularios
+  Object.keys(FORMULARIOS).forEach(idForm => {
+    const form = document.getElementById(idForm);
+    form.addEventListener('submit', guardarFormulario);
+    form.querySelector('[data-cancelar]').addEventListener('click', () => limpiarFormulario(idForm));
+    FORMULARIOS[idForm].porDefecto(form);
+  });
+  document.getElementById('formCierre').addEventListener('input', calcularCierre);
+  document.getElementById('botonTraerPagos').addEventListener('click', traerPagosDeCaja);
+  const formPago = document.getElementById('formPago');
+  formPago.elements.proveedor.addEventListener('input', actualizarNotaSaldo);
+  formPago.elements.tipo.addEventListener('change', actualizarNotaSaldo);
+  document.getElementById('selectCuenta').addEventListener('change', dibujarCuentaCorriente);
+
+  // Botones dentro de las tablas (delegación de eventos)
+  document.body.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.editar) editarRegistro(b.dataset.editar, b.dataset.id);
+    else if (b.dataset.eliminar) eliminarRegistro(b.dataset.eliminar, b.dataset.id);
+    else if (b.dataset.pagar !== undefined) { cambiarVista('proveedores'); prepararPago(b.dataset.pagar); }
+    else if (b.dataset.verCuenta !== undefined) {
+      cambiarVista('proveedores');
+      document.getElementById('selectCuenta').value = b.dataset.verCuenta;
+      dibujarCuentaCorriente();
+      document.getElementById('detalleCuenta').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Configuración
+  const dialogo = document.getElementById('dialogoConfig');
+  document.getElementById('botonConfig').addEventListener('click', () => {
+    document.getElementById('configUrl').value = configuracion.url;
+    document.getElementById('configClave').value = configuracion.clave;
+    dialogo.showModal();
+  });
+  document.getElementById('botonCerrarConfig').addEventListener('click', () => dialogo.close());
+  document.getElementById('botonGuardarConfig').addEventListener('click', async () => {
+    guardarConfiguracion({
+      url: document.getElementById('configUrl').value.trim(),
+      clave: document.getElementById('configClave').value
+    });
+    dialogo.close();
+    await cargarTodo();
+    if (configuracion.url) mostrarAviso('Conectado a Google Sheets');
+  });
+  document.getElementById('botonRecargar').addEventListener('click', cargarTodo);
+
+  cargarTodo();
+}
+
+iniciar();
+</script>
+</body>
+</html>
